@@ -33,6 +33,7 @@ mjx-container{color:inherit}
 main ul{font-size:17px;line-height:1.7;padding-left:22px}
 .pick:focus-visible{outline:2px solid var(--accent)}
 main table{display:block;overflow-x:auto;border-collapse:collapse;font:15px Inter,system-ui,sans-serif;margin:14px 0}main th,main td{border-bottom:1px solid var(--line);padding:6px 12px;text-align:right}main th{color:var(--accent)}
+.soal{border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:6px;padding:2px 18px;margin:12px 0;background:var(--card);font:16px/1.65 Inter,system-ui,sans-serif}.soal p{margin:10px 0}
 </style>
 </head>
 <body>
@@ -123,7 +124,14 @@ const T = {
  frek:{n:'Periode bayar ≠ periode konversi',d:'Samakan dulu periode bunga dengan periode pembayaran: bunga per periode bayar j memenuhi 1 + i = (1 + j)^m, lalu pakai rumus anuitas biasa.',f:String.raw`1+i=(1+j)^m,\qquad a^{(m)}_{\overline{n}|}=\frac{i}{i^{(m)}}a_{\overline{n}|}`,e:'12% convertible annually, bayar tiap kuartal: j = 1,12^(1/4) − 1 ≈ 2,8737% per kuartal.'},
  ia:{n:'Anuitas meningkat (Ia)',d:'Pembayaran 1, 2, …, n di akhir periode. Dapat dibaca sebagai tumpukan [[ditunda|anuitas ditunda]].',f:String.raw`(Ia)_{\overline{n}|}=\frac{\ddot a_{\overline{n}|}-nv^n}{i},\qquad (Is)_{\overline{n}|}=\frac{\ddot s_{\overline{n}|}-n}{i}`,e:'i = 5%, n = 5: (Ia)₅ ≈ 12,5664.'},
  da:{n:'Anuitas menurun (Da)',d:'Pembayaran n, n−1, …, 1 di akhir periode. Berlaku (Ia) + (Da) = (n+1)·a.',f:String.raw`(Da)_{\overline{n}|}=\frac{n-a_{\overline{n}|}}{i},\qquad (Ds)_{\overline{n}|}=\frac{n(1+i)^n-s_{\overline{n}|}}{i}`,e:'i = 5%, n = 5: (Da)₅ ≈ 13,4105; jumlah dengan (Ia)₅ = 6 × 4,3295 ≈ 25,977.'},
- geo:{n:'Anuitas geometri',d:'Pembayaran 1, (1+k), (1+k)², … Sama dengan anuitas level pada bunga j.',f:String.raw`PV=\frac{1-\left(\frac{1+k}{1+i}\right)^n}{i-k}=\frac{a_{\overline{n}|j}}{1+k},\ \ j=\frac{i-k}{1+k}`,e:'k = 2%, i = 5%, n = 10: PV ≈ 8,3881. Bila k = i, PV = n·v.'}
+ geo:{n:'Anuitas geometri',d:'Pembayaran 1, (1+k), (1+k)², … Sama dengan anuitas level pada bunga j.',f:String.raw`PV=\frac{1-\left(\frac{1+k}{1+i}\right)^n}{i-k}=\frac{a_{\overline{n}|j}}{1+k},\ \ j=\frac{i-k}{1+k}`,e:'k = 2%, i = 5%, n = 10: PV ≈ 8,3881. Bila k = i, PV = n·v.'},
+ wl:{n:'Asuransi seumur hidup (whole life)',d:'Manfaat 1 dibayar di akhir tahun kematian, kapan pun terjadi. Dihitung dari [[tpx|peluang hidup]] dan [[v|faktor diskonto]]. Hubungan dengan [[hidup|anuitas hidup]]: A = 1 − d·ä.',f:String.raw`A_x=\sum_{k=0}^{\infty}v^{k+1}{}_kp_xq_{x+k}=1-d\,\ddot a_x`,e:'i = 5%, ä_x = 15: A_x = 1 − 0,047619 × 15 ≈ 0,2857.'},
+ konvp:{n:'Konvergen dalam peluang',d:'Peluang X_n menyimpang dari X sebesar ε atau lebih menuju nol saat n membesar, untuk setiap ε > 0.',f:String.raw`X_n\xrightarrow{P}X\iff \lim_{n\to\infty}P(|X_n-X|\ge\varepsilon)=0`,e:'X̄ₙ → μ dalam peluang (lihat [[wlln|WLLN]]).'},
+ wlln:{n:'Hukum bilangan besar lemah (WLLN)',d:'Rata-rata sampel iid konvergen dalam peluang ke mean populasi. Dibuktikan dengan ketaksamaan Chebyshev.',f:String.raw`P(|\bar X_n-\mu|\ge\varepsilon)\le\frac{\sigma^2}{n\varepsilon^2}\to0`,e:'σ² = 4, n = 100, ε = 0,5: batas atas peluang = 4/(100 × 0,25) = 0,16.'},
+ konvd:{n:'Konvergen dalam distribusi',d:'Fungsi distribusi F_n(x) menuju F(x) di setiap titik kontinu F. Lebih lemah dari [[konvp|konvergen dalam peluang]].',f:String.raw`X_n\xrightarrow{D}X\iff F_n(x)\to F(x)\ \text{di titik kontinu }F`,e:'Z_n = (X̄ₙ − μ)/(σ/√n) → N(0,1) dalam distribusi (CLT).'},
+ slutsky:{n:'Teorema Slutsky',d:'Jika X_n → X dalam distribusi dan Y_n → c dalam peluang (c konstanta), jumlah, hasil kali, dan hasil bagi tetap konvergen.',f:String.raw`X_n+Y_n\xrightarrow{D}X+c,\quad X_nY_n\xrightarrow{D}cX,\quad X_n/Y_n\xrightarrow{D}X/c\ (c\ne0)`,e:'Mengganti σ dengan s pada statistik z tetap memberi limit N(0,1).'},
+ delta:{n:'Metode delta',d:'Distribusi limit fungsi dari penaksir yang sudah diketahui distribusi limitnya.',f:String.raw`\sqrt n(\hat\theta-\theta)\xrightarrow{D}N(0,\sigma^2)\Rightarrow\sqrt n(g(\hat\theta)-g(\theta))\xrightarrow{D}N\big(0,[g\prime(\theta)]^2\sigma^2\big)`,e:'g(θ) = θ²: varians limit = (2θ)²σ².'},
+ kkon:{n:'Koreksi kontinuitas',d:'Binomial diskrit dihampiri normal kontinu dengan menggeser batas sebesar 0,5. Syarat: np ≥ 5 dan n(1−p) ≥ 5.',f:String.raw`P(X\le k)\approx P\!\left(Z\le\frac{k+0{,}5-np}{\sqrt{np(1-p)}}\right)`,e:'n = 100, p = 0,1, k = 12: Z = 2,5/3 ≈ 0,83, peluang ≈ 0,7967.'}
 };
 const link = s => s.replace(/\[\[(\w+)\|([^\]]+)\]\]/g,'<span class="term" data-t="$1">$2</span>');
 
@@ -165,7 +173,13 @@ const C = {
   {id:"matkeu-1",t:"Bunga dan anuitas",h:String.raw`<h2>Nilai uang terhadap waktu</h2>
 <p>Satu rupiah hari ini lebih berharga daripada satu rupiah tahun depan karena uang bisa berbunga. Ada [[sederhana|bunga sederhana]] dan [[majemuk|bunga majemuk]]; ukuran per periodenya adalah [[bunga|suku bunga efektif]]. Pembayaran masa depan diubah menjadi [[pv|nilai sekarang]] memakai [[v|faktor diskonto]].</p>
 <h2>Anuitas</h2>
-<p>[[anuitas|Anuitas]] adalah rangkaian pembayaran berkala. Pembayaran di akhir periode disebut [[pasti|anuitas pasti]], di awal periode disebut [[awal|anuitas awal]], dan yang tak berujung disebut [[perpet|perpetuitas]].</p>`},
+<p>[[anuitas|Anuitas]] adalah rangkaian pembayaran berkala. Pembayaran di akhir periode disebut [[pasti|anuitas pasti]], di awal periode disebut [[awal|anuitas awal]], dan yang tak berujung disebut [[perpet|perpetuitas]].</p>
+<h2>Contoh soal dan pembahasan</h2>
+<div class="soal"><p><b>Soal.</b> Cicilan Rp1.000.000 dibayar tiap akhir tahun selama 10 tahun, \(i=5\%\) efektif.</p>
+<p><b>Diketahui:</b> \(R=1.000.000\), \(n=10\), \(i=5\%\).</p>
+<p><b>Ditanyakan:</b> Nilai sekarang cicilan.</p>
+<p><b>Penyelesaian:</b> \(PV=R\,a_{\overline{10}|}=R\frac{1-1{,}05^{-10}}{0{,}05}=1.000.000\times7{,}7217\approx\) Rp7.721.735.</p>
+<p><b>Interpretasi:</b> Sepuluh pembayaran Rp1.000.000 (total Rp10.000.000) setara dengan Rp7.721.735 hari ini, karena pembayaran yang lebih lambat dinilai lebih kecil.</p></div>`},
   {id:"matkeu-a1",t:"Anuitas pada sembarang waktu (Pekan 1–2)",h:String.raw`<h2>Review</h2>
 <p>Notasi dasar: \(a_{\overline{n}|}=\frac{1-v^n}{i}\), \(s_{\overline{n}|}=\frac{(1+i)^n-1}{i}\), \(\ddot a_{\overline{n}|}=\frac{1-v^n}{d}\), \(\ddot s_{\overline{n}|}=\frac{(1+i)^n-1}{d}\). Dua hubungan:</p>
 \[\text{Tipe I: }\ddot a=(1+i)a,\ \ddot s=(1+i)s\qquad\text{Tipe II: }\ddot a_{\overline{n}|}=1+a_{\overline{n-1}|},\ \ddot s_{\overline{n}|}=s_{\overline{n+1}|}-1\]
@@ -179,7 +193,13 @@ const C = {
 <p>Contoh: setor Rp5.000.000 di awal tiap tahun selama 5 tahun pada 8%, lalu dibiarkan 3 tahun: \(5\cdot10^6\,\ddot s_{\overline{5}|}(1{,}08)^3\approx\) Rp39.907.229. Setor Rp4.000.000 di akhir tiap tahun, 5 tahun, 9%, ditambah 4 tahun: \(4\cdot10^6\,s_{\overline{5}|}(1{,}09)^4\approx\) Rp33.791.630.</p>
 <p><b>Kasus 3: di antara pembayaran pertama dan terakhir</b> (nilai pada waktu \(m<n\)):</p>
 \[a_{\overline{n}|}(1+i)^m\ \text{atau}\ s_{\overline{n}|}v^{n-m};\qquad \ddot a_{\overline{n}|}(1+i)^m\ \text{atau}\ \ddot s_{\overline{n}|}v^{n-m}\]
-<p>Contoh: Rp2.000.000 tiap akhir tahun selama 10 tahun, \(i=6\%\), nilai pada akhir tahun ke-6: \(2\cdot10^6\,s_{\overline{10}|}v^4\approx\) Rp20.880.848.</p>`},
+<p>Contoh: Rp2.000.000 tiap akhir tahun selama 10 tahun, \(i=6\%\), nilai pada akhir tahun ke-6: \(2\cdot10^6\,s_{\overline{10}|}v^4\approx\) Rp20.880.848.</p>
+<h2>Contoh soal dan pembahasan</h2>
+<div class="soal"><p><b>Soal.</b> Rp2.000.000 dibayar tiap akhir tahun selama 10 tahun, \(i=6\%\). Berapa nilai akumulasinya pada akhir tahun ke-6?</p>
+<p><b>Diketahui:</b> \(R=2.000.000\), \(n=10\), \(i=6\%\), \(m=6\) (kasus 3).</p>
+<p><b>Ditanyakan:</b> Nilai pada waktu \(t=6\).</p>
+<p><b>Penyelesaian:</b> \(2\cdot10^6\,s_{\overline{10}|}v^{4}=2\cdot10^6(13{,}1808)(0{,}79209)\approx\) Rp20.880.848.</p>
+<p><b>Interpretasi:</b> Semua pembayaran bila "dipindahkan" ke akhir tahun ke-6 bernilai Rp20,88 juta; pembayaran sebelum tahun 6 diakumulasi, sesudahnya didiskon.</p></div>`},
   {id:"matkeu-a2",t:"Anuitas lanjutan: waktu, suku bunga, bunga berubah (Pekan 3)",h:String.raw`<h2>Jangka waktu tidak diketahui</h2>
 <p>Dari \(a_{\overline{t}|}=g\): \(t=\dfrac{\ln(1-ig)}{-\ln(1+i)}\). Contoh \(i=6\%\), \(g=4{,}499\): \(t\approx5{,}3996\), jadi 5 pembayaran reguler dan 1 pembayaran tidak reguler. Tulis \(t=n+k\), \(0<k<1\). Pembayaran tidak reguler dapat berupa [[balon|balloon, drop, atau tepat di n+k]]:</p>
 \[PV=a_{\overline{n}|}+v^nX_1=a_{\overline{n}|}+v^{n+k}X_2=a_{\overline{n}|}+v^{n+1}X_3\]
@@ -192,7 +212,13 @@ const C = {
 <p>Misalkan \(i_k\) adalah bunga periode ke-\(k\), \(v_k=(1+i_k)^{-1}\). Dua pendekatan: [[portf|portfolio rate method]] dan [[ycm|yield curve method]].</p>
 \[a_{\overline{n}|}=\sum_{j=1}^{n}\prod_{k=1}^{j}v_k\ \ (\text{portfolio}),\qquad a_{\overline{n}|}=\sum_{k=1}^{n}v_k^{\,k}\ \ (\text{yield curve})\]
 <p>Untuk nilai akumulasi, \(\ddot s_{\overline{n}|}=\sum_{j=1}^{n}\prod_{k=1}^{j}(1+i_{n-k+1})\) (portfolio) dan \(\ddot s_{\overline{n}|}=\sum_{k=1}^{n}(1+i_{n-k+1})^k\) (yield curve).</p>
-<p>Contoh: \(i_t=6\%+0{,}2\%(t-1)\), \(t=1,\dots,5\). Yield curve: \(a_{\overline{5}|}\approx4{,}1543\). Portfolio: \(a_{\overline{5}|}\approx4{,}1831\).</p>`},
+<p>Contoh: \(i_t=6\%+0{,}2\%(t-1)\), \(t=1,\dots,5\). Yield curve: \(a_{\overline{5}|}\approx4{,}1543\). Portfolio: \(a_{\overline{5}|}\approx4{,}1831\).</p>
+<h2>Contoh soal dan pembahasan</h2>
+<div class="soal"><p><b>Soal.</b> Deposit 1.000 dipakai untuk penarikan 100 tiap akhir tahun selama mungkin, \(i=5\%\). Tentukan banyak penarikan reguler dan penarikan terakhir bila dibayar bersama penarikan reguler terakhir (balloon).</p>
+<p><b>Diketahui:</b> \(PV=1000\), \(R=100\), \(i=5\%\).</p>
+<p><b>Ditanyakan:</b> \(n\) dan besar \(X_1\).</p>
+<p><b>Penyelesaian:</b> \(a_{\overline{t}|}=10\Rightarrow t=\frac{\ln 2}{\ln1{,}05}\approx14{,}2067\), \(n=14\), \(a_{\overline{14}|}=9{,}8986\). \(X_1=(1000-100\cdot9{,}8986)(1{,}05)^{14}\approx20{,}07\).</p>
+<p><b>Interpretasi:</b> Ada 14 penarikan 100 penuh; penarikan ke-14 ditambah 20,07 (menjadi 120,07) menghabiskan dana.</p></div>`},
   {id:"matkeu-a3",t:"Periode pembayaran berbeda dengan konversi bunga (Pekan 4–6)",h:String.raw`<h2>Pendekatan numerik</h2>
 <p>Dua langkah: (1) ubah suku bunga ke periode yang sama dengan pembayaran, \(1+i=(1+j)^m\); (2) hitung dengan rumus anuitas biasa. Cara ini berlaku umum, termasuk bila waktu atau suku bunga tidak diketahui.</p>
 <p>Contoh: pinjaman Rp30.000.000, cicilan akhir kuartal selama 5 tahun, 12% convertible annually. \(j=1{,}12^{1/4}-1\approx2{,}8737\%\), \(R=30\cdot10^6/a_{\overline{20}|j}\approx\) Rp1.993.005. Contoh lain: $3000, cicilan kuartalan 5 tahun, 10% convertible semiannually: \(j=1{,}05^{1/2}-1\), \(R\approx191{,}89\).</p>
@@ -204,7 +230,13 @@ const C = {
 <h2>Pendekatan aljabar: pembayaran lebih sering (anuitas m-thly)</h2>
 <p>Pembayaran \(1/m\) sebanyak \(mn\) kali, \(1+i=(1+j)^m\):</p>
 \[a^{(m)}_{\overline{n}|}=\frac{1-v^n}{i^{(m)}}=\frac{i}{i^{(m)}}a_{\overline{n}|},\quad s^{(m)}_{\overline{n}|}=\frac{i}{i^{(m)}}s_{\overline{n}|},\quad \ddot a^{(m)}_{\overline{n}|}=\frac{d}{d^{(m)}}\ddot a_{\overline{n}|},\quad \ddot s^{(m)}_{\overline{n}|}=\frac{d}{d^{(m)}}\ddot s_{\overline{n}|}\]
-\[a^{(m)}_{\overline{\infty}|}=\frac1{i^{(m)}},\qquad \ddot a^{(m)}_{\overline{\infty}|}=\frac1{d^{(m)}}\]`},
+\[a^{(m)}_{\overline{\infty}|}=\frac1{i^{(m)}},\qquad \ddot a^{(m)}_{\overline{\infty}|}=\frac1{d^{(m)}}\]
+<h2>Contoh soal dan pembahasan</h2>
+<div class="soal"><p><b>Soal.</b> Pinjaman Rp30.000.000 dilunasi dengan cicilan akhir kuartal selama 5 tahun, bunga 12% convertible annually.</p>
+<p><b>Diketahui:</b> \(L=30.000.000\), 20 kuartal, \(i=12\%\) per tahun.</p>
+<p><b>Ditanyakan:</b> Besar cicilan per kuartal.</p>
+<p><b>Penyelesaian:</b> \(j=1{,}12^{1/4}-1\approx2{,}8737\%\). \(R=\frac{30\cdot10^6}{a_{\overline{20}|j}}\approx\) Rp1.993.005.</p>
+<p><b>Interpretasi:</b> Peminjam membayar sekitar Rp1,99 juta per kuartal; total Rp39,86 juta selama 5 tahun.</p></div>`},
   {id:"matkeu-a4",t:"Anuitas dengan pembayaran bervariasi (Pekan 7)",h:String.raw`<h2>Progresi aritmetika</h2>
 <p>Pembayaran akhir periode: \(P,\ P+Q,\ \dots,\ P+(n-1)Q\) (syarat \(P+(n-1)Q>0\)). Mengalikan dengan \((1+i)\) lalu mengurangkan menyisakan deret geometri:</p>
 \[PV=P\,a_{\overline{n}|}+Q\,\frac{a_{\overline{n}|}-nv^n}{i},\qquad AV=P\,s_{\overline{n}|}+Q\,\frac{s_{\overline{n}|}-n}{i}\]
@@ -218,7 +250,13 @@ const C = {
 \[PV=\frac{1-\left(\frac{1+k}{1+i}\right)^n}{i-k},\qquad k=i:\ PV=nv,\qquad PV=\frac{a_{\overline{n}|j}}{1+k},\ j=\frac{i-k}{1+k}\]
 <p>Contoh \(k=2\%\), \(i=5\%\), \(n=10\): \(PV\approx8{,}3881\).</p>
 <h2>Perpetuitas bervariasi</h2>
-<p>Limit \(n\to\infty\): \((Ia)_{\overline{\infty}|}=\dfrac1{id}\) (versi awal \(1/d^2\)); geometri \(\dfrac1{i-k}\) bila \(k<i\); anuitas menurun tidak mempunyai perpetuitas.</p>`},
+<p>Limit \(n\to\infty\): \((Ia)_{\overline{\infty}|}=\dfrac1{id}\) (versi awal \(1/d^2\)); geometri \(\dfrac1{i-k}\) bila \(k<i\); anuitas menurun tidak mempunyai perpetuitas.</p>
+<h2>Contoh soal dan pembahasan</h2>
+<div class="soal"><p><b>Soal.</b> Pembayaran akhir tahun selama 5 tahun: 1.000, 1.100, 1.200, 1.300, 1.400, dengan \(i=5\%\).</p>
+<p><b>Diketahui:</b> \(P=1000\), \(Q=100\), \(n=5\), \(i=5\%\).</p>
+<p><b>Ditanyakan:</b> Nilai sekarang.</p>
+<p><b>Penyelesaian:</b> \(PV=Pa_{\overline{5}|}+Q\frac{a_{\overline{5}|}-5v^5}{i}=1000(4{,}3295)+100\frac{4{,}3295-3{,}9176}{0{,}05}\approx5.153{,}17\).</p>
+<p><b>Interpretasi:</b> Rangkaian yang naik 100 per tahun bernilai 5.153,17 hari ini; bagian "naik" menyumbang 823,69.</p></div>`},
   {id:"matkeu-2",t:"Amortisasi pinjaman (Pekan 9–10)",h:String.raw`<h2>Pembayaran dan saldo</h2>
 <p>Pinjaman \(L\) dilunasi dengan \(n\) pembayaran sama \(R\) di akhir periode. Lewat [[amort|amortisasi]], \(L=R\,a_{\overline{n}|}\) sehingga \(R=L/a_{\overline{n}|}\). [[saldo|Saldo pinjaman]] setelah pembayaran ke-\(t\):</p>
 \[B_t^{p}=R\,a_{\overline{n-t}|}\quad(\text{prospektif}),\qquad B_t^{r}=L(1+i)^t-R\,s_{\overline{t}|}\quad(\text{retrospektif})\]
@@ -235,7 +273,13 @@ const C = {
 <h2>Mencari jangka waktu, suku bunga, dan periode</h2>
 <p><b>Jangka waktu:</b> dari \(L=R\,a_{\overline{n}|}\) diperoleh \(n=-\dfrac{\ln(1-iL/R)}{\ln(1+i)}\). Jika \(n\) tidak bulat, ada pembayaran terakhir yang lebih kecil (<i>drop payment</i>) atau lebih besar (<i>balloon</i>) satu periode setelah pembayaran penuh terakhir.</p>
 <p><b>Suku bunga:</b> selesaikan \(a_{\overline{n}|i}=L/R\) dengan interpolasi linier atau Newton–Raphson.</p>
-<p><b>Periode pembayaran:</b> bila dibayar \(m\) kali setahun, pakai \(i^{(m)}/m\) per periode dan \(n\to mn\). Pokok pinjaman dapat dicari dari \(L=R\,a_{\overline{n}|}\) bila \(R,n,i\) diketahui, dan sisa pinjaman dari rumus [[saldo|saldo]] di atas.</p>`},
+<p><b>Periode pembayaran:</b> bila dibayar \(m\) kali setahun, pakai \(i^{(m)}/m\) per periode dan \(n\to mn\). Pokok pinjaman dapat dicari dari \(L=R\,a_{\overline{n}|}\) bila \(R,n,i\) diketahui, dan sisa pinjaman dari rumus [[saldo|saldo]] di atas.</p>
+<h2>Contoh soal dan pembahasan</h2>
+<div class="soal"><p><b>Soal.</b> Pinjaman Rp1.000.000 dilunasi dengan 3 pembayaran tahunan sama, \(i=10\%\). Tentukan pembayaran serta bunga dan pokok pada pembayaran kedua.</p>
+<p><b>Diketahui:</b> \(L=1.000.000\), \(n=3\), \(i=10\%\).</p>
+<p><b>Ditanyakan:</b> \(R\), \(I_2\), \(P_2\).</p>
+<p><b>Penyelesaian:</b> \(R=L/a_{\overline{3}|}=1.000.000/2{,}4869\approx402.115\). \(B_1=697.885\), \(I_2=0{,}1\times697.885=69.789\), \(P_2=402.115-69.789=332.326\).</p>
+<p><b>Interpretasi:</b> Pada pembayaran kedua, 17,4% dipakai untuk bunga dan sisanya mengurangi pokok; bagian pokok naik tiap periode.</p></div>`},
   {id:"matkeu-3",t:"Sinking fund (Pekan 11–12)",h:String.raw`<h2>Gagasan</h2>
 <p>Pada metode [[sf|sinking fund]], pokok \(L\) tidak dicicil. Peminjam membayar bunga \(iL\) tiap periode kepada pemberi pinjaman dan menyetor \(D\) ke dana yang berbunga \(j\), sehingga dana di akhir sama dengan \(L\):</p>
 \[D\,s_{\overline{n}|j}=L\ \Rightarrow\ D=\frac{L}{s_{\overline{n}|j}},\qquad \text{total per periode}=iL+\frac{L}{s_{\overline{n}|j}}\]
@@ -250,7 +294,13 @@ const C = {
 <tr><td>3</td><td>308.034</td><td>51.257</td><td>1.000.002</td><td>≈ 0</td></tr></table>
 <h2>Mencari besaran yang tidak diketahui</h2>
 <p><b>Suku bunga efektif peminjam</b> \(i'\): selesaikan \(L\,a_{\overline{n}|i'}=iL+D\), yaitu pembayaran total yang diperlakukan sebagai anuitas. Selalu \(i'>i\) bila \(j<i\).</p>
-<p><b>Jangka waktu:</b> dari \(D\,s_{\overline{n}|j}=L\) diperoleh \(n=\dfrac{\ln(1+jL/D)}{\ln(1+j)}\). <b>Besar pembayaran</b> dan <b>pokok</b> dari rumus \(D\) di atas. Bila periode pembayaran berbeda dengan periode bunga dana, ubah ke suku bunga per periode pembayaran lebih dulu.</p>`},
+<p><b>Jangka waktu:</b> dari \(D\,s_{\overline{n}|j}=L\) diperoleh \(n=\dfrac{\ln(1+jL/D)}{\ln(1+j)}\). <b>Besar pembayaran</b> dan <b>pokok</b> dari rumus \(D\) di atas. Bila periode pembayaran berbeda dengan periode bunga dana, ubah ke suku bunga per periode pembayaran lebih dulu.</p>
+<h2>Contoh soal dan pembahasan</h2>
+<div class="soal"><p><b>Soal.</b> Pinjaman Rp1.000.000, 3 tahun, bunga 10% dibayar tiap tahun, pokok dilunasi lewat sinking fund yang berbunga 8%.</p>
+<p><b>Diketahui:</b> \(L=1.000.000\), \(n=3\), \(i=10\%\), \(j=8\%\).</p>
+<p><b>Ditanyakan:</b> Total pembayaran per tahun dan pinjaman neto di akhir tahun ke-2.</p>
+<p><b>Penyelesaian:</b> \(D=L/s_{\overline{3}|8\%}=1.000.000/3{,}2464\approx308.034\); total \(=100.000+308.034=408.034\). \(SF_2=308.034\,s_{\overline{2}|8\%}=640.711\); neto \(=359.289\).</p>
+<p><b>Interpretasi:</b> Total Rp408.034 lebih besar dari Rp402.115 pada amortisasi karena dana hanya berbunga 8% < 10%.</p></div>`},
   {id:"matkeu-4",t:"Harga dan nilai buku obligasi (Pekan 13–14)",h:String.raw`<h2>Harga obligasi</h2>
 <p>[[obl|Obligasi]] bernominal \(F\) membayar [[kupon|kupon]] \(Fr\) tiap periode dan [[tebus|nilai tebus]] \(C\) di akhir periode ke-\(n\). Pada imbal hasil \(i\):</p>
 \[P=Fr\,a_{\overline{n}|}+C\,v^n=C+(Fr-Ci)\,a_{\overline{n}|}\]
@@ -266,7 +316,13 @@ const C = {
 <tr><td>1</td><td>60</td><td>51,36</td><td>8,64</td><td>1.018,59</td></tr>
 <tr><td>2</td><td>60</td><td>50,93</td><td>9,07</td><td>1.009,52</td></tr>
 <tr><td>3</td><td>60</td><td>50,48</td><td>9,52</td><td>1.000,00</td></tr></table>
-<p>Dengan \(i=7\%\) obligasi yang sama berharga \(\approx 973{,}76\) (diskon 26,24). Nilai tebus dan nominal dapat dicari dari rumus harga bila \(P,r,n,i\) diketahui.</p>`},
+<p>Dengan \(i=7\%\) obligasi yang sama berharga \(\approx 973{,}76\) (diskon 26,24). Nilai tebus dan nominal dapat dicari dari rumus harga bila \(P,r,n,i\) diketahui.</p>
+<h2>Contoh soal dan pembahasan</h2>
+<div class="soal"><p><b>Soal.</b> Obligasi nominal dan tebus 1.000, kupon 6% tahunan, jatuh tempo 3 tahun, imbal hasil 5%.</p>
+<p><b>Diketahui:</b> \(F=C=1000\), \(r=6\%\), \(n=3\), \(i=5\%\).</p>
+<p><b>Ditanyakan:</b> Harga, premi, dan nilai buku setelah tahun pertama.</p>
+<p><b>Penyelesaian:</b> \(P=60a_{\overline{3}|}+1000v^3=163{,}39+863{,}84=1.027{,}23\); premi \(=27{,}23\). \(BV_1=1.027{,}23(1{,}05)-60=1.018{,}59\).</p>
+<p><b>Interpretasi:</b> Karena kupon (6%) di atas imbal hasil (5%), harga di atas par; premi diamortisasi 8,64 pada tahun pertama dan nilai buku turun ke 1.000 di jatuh tempo.</p></div>`},
   {id:"matkeu-5",t:"Kupon, jangka waktu, dan kurva imbal hasil (Pekan 15)",h:String.raw`<h2>Mencari kupon dan jangka waktu</h2>
 <p>Dari harga \(P\) yang diketahui:</p>
 \[Fr=\frac{P-Cv^n}{a_{\overline{n}|}},\qquad v^n=1-i\,\frac{P-C}{Fr-Ci}\ \Rightarrow\ n=-\frac{\ln v^n}{\ln(1+i)}\]
@@ -278,8 +334,59 @@ const C = {
 <h2>Membuat kurva imbal hasil</h2>
 <p>[[kurva|Kurva imbal hasil]] dibuat dengan <i>bootstrapping</i>: mulai dari obligasi satu tahun untuk \(s_1\), lalu tiap obligasi berikutnya memberi satu \(s_n\) baru.</p>
 \[1+s_n=\left(\frac{Fr+C}{P-Fr\sum_{k=1}^{n-1}(1+s_k)^{-k}}\right)^{1/n}\]
-<p>Contoh: obligasi 2 tahun, \(F=C=100\), \(r=6\%\), \(P=101{,}9143\), \(s_1=4\%\). Nilai sekarang kupon pertama \(=6/1{,}04=5{,}7692\), sisa \(=96{,}1451\), maka \(1+s_2=(106/96{,}1451)^{1/2}=1{,}05\) dan \(s_2=5\%\). Titik \((1;4\%)\), \((2;5\%)\) membentuk kurva yang menaik.</p>`}]},
+<p>Contoh: obligasi 2 tahun, \(F=C=100\), \(r=6\%\), \(P=101{,}9143\), \(s_1=4\%\). Nilai sekarang kupon pertama \(=6/1{,}04=5{,}7692\), sisa \(=96{,}1451\), maka \(1+s_2=(106/96{,}1451)^{1/2}=1{,}05\) dan \(s_2=5\%\). Titik \((1;4\%)\), \((2;5\%)\) membentuk kurva yang menaik.</p>
+<h2>Contoh soal dan pembahasan</h2>
+<div class="soal"><p><b>Soal.</b> Obligasi 2 tahun, nominal = tebus 100, kupon 6, harga 101,9143. Suku bunga spot 1 tahun \(s_1=4\%\).</p>
+<p><b>Diketahui:</b> \(F=C=100\), \(Fr=6\), \(P=101{,}9143\), \(s_1=4\%\).</p>
+<p><b>Ditanyakan:</b> \(s_2\) dan forward \(f_{1,2}\).</p>
+<p><b>Penyelesaian:</b> \(P-\frac{6}{1{,}04}=96{,}1451\). \(1+s_2=\sqrt{106/96{,}1451}=1{,}05\Rightarrow s_2=5\%\). \(f_{1,2}=\frac{1{,}05^2}{1{,}04}-1\approx6{,}01\%\).</p>
+<p><b>Interpretasi:</b> Kurva imbal hasil menaik (4% ke 5%); pasar mengimplikasikan bunga 6,01% untuk tahun kedua.</p></div>`}]},
  statmat:{t:"Statistika Matematika",ch:[
+  {id:"statmat-c1",t:"Teorema limit pusat dan hampiran normal (Pekan 3–4)",h:String.raw`<h2>Teorema limit pusat</h2>
+<p>Misalkan \(X_1,\dots,X_n\) iid dengan mean \(\mu\) dan varians \(\sigma^2\). Menurut [[clt|CLT]], untuk \(n\) besar:</p>
+\[Z_n=\frac{\bar X_n-\mu}{\sigma/\sqrt n}=\frac1{\sqrt n}\sum_{i=1}^n Y_i\ \xrightarrow{D}\ N(0,1),\qquad Y_i=\frac{X_i-\mu}{\sigma}\]
+<p>Bentuk distribusi populasi tidak berpengaruh. Sketsa bukti dengan [[mgf|m.g.f.]]: \(E(Y_i)=0\), \(\mathrm{Var}(Y_i)=1\), sehingga deret Taylor memberi \(M_Y(t)\approx1+\frac{t^2}{2}\). Maka \(M_{Z_n}(t)=[M_Y(t/\sqrt n)]^n\approx\left[1+\frac{t^2}{2n}\right]^n\to e^{t^2/2}\), yaitu m.g.f. \(N(0,1)\). Keunikan m.g.f. menyimpulkan \(Z_n\xrightarrow{D}N(0,1)\).</p>
+<h2>Hampiran normal untuk binomial</h2>
+<p>Bila \(X\sim\text{Bin}(n,p)\) dengan \(np\ge5\) dan \(n(1-p)\ge5\), pakai \(\mu=np\), \(\sigma^2=np(1-p)\) dan [[kkon|koreksi kontinuitas]]: \(P(X\le k)\to k+0{,}5\), \(P(X\ge k)\to k-0{,}5\), \(P(X=k)\to(k-0{,}5,\,k+0{,}5)\).</p>
+<h2>Selang kepercayaan sampel besar</h2>
+\[\bar x\pm z_{\alpha/2}\frac{s}{\sqrt n},\qquad \hat p\pm z_{\alpha/2}\sqrt{\frac{\hat p(1-\hat p)}{n}}\ \ (n\hat p,\,n(1-\hat p)\ge10)\]
+<p>Penggantian \(\sigma\) dengan \(s\) dan \(p\) dengan \(\hat p\) dibenarkan oleh [[slutsky|teorema Slutsky]]. Lihat juga [[wlln|hukum bilangan besar]] pada bab berikutnya.</p>
+<h2>Contoh soal dan pembahasan</h2>
+<div class="soal"><p><b>Soal.</b> Populasi memiliki \(\mu=50\) dan \(\sigma^2=144\). Sampel acak \(n=36\). Berapa \(P(46<\bar X<54)\)?</p>
+<p><b>Diketahui:</b> \(\mu=50\), \(\sigma=12\), \(n=36\).</p>
+<p><b>Ditanyakan:</b> \(P(46<\bar X<54)\).</p>
+<p><b>Penyelesaian:</b> \(Z=\frac{\bar X-50}{12/6}\): \(z_1=-2\), \(z_2=2\). \(P(-2<Z<2)=0{,}9772-0{,}0228=0{,}9544\).</p>
+<p><b>Interpretasi:</b> Dengan peluang sekitar 95,44% rata-rata sampel jatuh dalam 4 satuan dari rata-rata populasi.</p></div>`},
+  {id:"statmat-c2",t:"Jenis kekonvergenan (Pekan 5)",h:String.raw`<h2>Konvergen dalam peluang</h2>
+<p>\(X_n\xrightarrow{P}X\) ([[konvp|dalam peluang]]) bila \(P(|X_n-X|\ge\varepsilon)\to0\) untuk setiap \(\varepsilon>0\).</p>
+<h2>Hukum bilangan besar lemah</h2>
+<p>Untuk iid dengan mean \(\mu\), varians \(\sigma^2\): \(E(\bar X_n)=\mu\), \(\mathrm{Var}(\bar X_n)=\sigma^2/n\). Ketaksamaan Chebyshev memberi \(P(|\bar X_n-\mu|\ge\varepsilon)\le\frac{\sigma^2}{n\varepsilon^2}\to0\), jadi \(\bar X_n\xrightarrow{P}\mu\) ([[wlln|WLLN]]).</p>
+<h2>Konsistensi penaksir</h2>
+<p>\(\hat\theta_n\) konsisten bila \(\hat\theta_n\xrightarrow{P}\theta\). Syarat cukup: \(E(\hat\theta_n)\to\theta\) dan \(\mathrm{Var}(\hat\theta_n)\to0\).</p>
+<h2>Konvergen dalam distribusi</h2>
+<p>\(X_n\xrightarrow{D}X\) ([[konvd|dalam distribusi]]) bila \(F_n(x)\to F(x)\) di setiap titik kontinu \(F\). Konvergen dalam peluang memastikan konvergen dalam distribusi, tetapi tidak sebaliknya (kecuali limitnya konstanta).</p>
+<h2>Teorema pendukung</h2>
+<p><b>Continuous mapping:</b> \(g\) kontinu dan \(X_n\xrightarrow{D}X\) maka \(g(X_n)\xrightarrow{D}g(X)\). <b>[[slutsky|Slutsky]]:</b> \(X_n\xrightarrow{D}X\), \(Y_n\xrightarrow{P}c\) maka \(X_n+Y_n\to X+c\), \(X_nY_n\to cX\). <b>[[delta|Metode delta]]:</b> \(\sqrt n(\hat\theta-\theta)\xrightarrow{D}N(0,\sigma^2)\) maka \(\sqrt n(g(\hat\theta)-g(\theta))\xrightarrow{D}N(0,[g\prime(\theta)]^2\sigma^2)\).</p>
+<h2>Contoh soal dan pembahasan</h2>
+<div class="soal"><p><b>Soal.</b> \(X_i\) iid dengan mean 10 dan varians 4, \(n=100\). Beri batas atas \(P(|\bar X-10|\ge0{,}5)\).</p>
+<p><b>Diketahui:</b> \(\mu=10\), \(\sigma^2=4\), \(n=100\), \(\varepsilon=0{,}5\).</p>
+<p><b>Ditanyakan:</b> Batas atas peluang penyimpangan.</p>
+<p><b>Penyelesaian:</b> Chebyshev: \(\frac{\sigma^2}{n\varepsilon^2}=\frac{4}{100(0{,}25)}=0{,}16\).</p>
+<p><b>Interpretasi:</b> Peluang rata-rata menyimpang 0,5 atau lebih tidak lebih dari 16%; bila \(n\) diperbesar batas ini menuju 0 (WLLN).</p></div>`},
+  {id:"statmat-m",t:"Metode momen (Pekan 6–8)",h:String.raw`<h2>Momen populasi dan momen sampel</h2>
+<p>Momen populasi ke-\(k\): \(\mu'_k=E(X^k)\). Momen sampel: \(m'_k=\frac1n\sum_{i=1}^nX_i^k\), dengan \(m'_1=\bar X\). Ingat \(\mathrm{Var}(X)=\mu'_2-(\mu'_1)^2\) dan \(m'_2\ne\bar X^2\).</p>
+<h2>Prinsip</h2>
+<p>[[mom|Metode momen]] menyamakan \(m'_j=\mu'_j\), \(j=1,\dots,p\), untuk \(p\) parameter yang tidak diketahui, lalu menyelesaikan persamaannya. Metode ini sederhana tetapi tidak selalu seefisien [[mle|MLE]].</p>
+<h2>Contoh 1: Uniform(0, θ)</h2>
+<p>\(E(X)=\int_0^\theta x\frac1\theta dx=\frac\theta2\). Samakan \(\bar X=\theta/2\), sehingga \(\hat\theta_{MOM}=2\bar X\).</p>
+<h2>Contoh 2: Normal(μ, σ²)</h2>
+<p>\(\mu'_1=\mu\), \(\mu'_2=\sigma^2+\mu^2\). Maka \(\hat\mu=\bar X\) dan \(\hat\sigma^2=m'_2-\bar X^2=\frac1n\sum(X_i-\bar X)^2\).</p>
+<h2>Contoh soal dan pembahasan</h2>
+<div class="soal"><p><b>Soal.</b> Data dari Uniform(0, θ): 2, 4, 5, 7. Taksir θ dengan metode momen.</p>
+<p><b>Diketahui:</b> \(n=4\), data 2, 4, 5, 7.</p>
+<p><b>Ditanyakan:</b> \(\hat\theta_{MOM}\).</p>
+<p><b>Penyelesaian:</b> \(\bar x=18/4=4{,}5\). \(\hat\theta=2\bar x=9\).</p>
+<p><b>Interpretasi:</b> Taksiran 9 masuk akal karena melebihi pengamatan terbesar (7).</p></div>`},
   {id:"statmat-1",t:"Penaksiran titik dan MLE",h:String.raw`<h2>Penaksiran titik</h2>
 <p>Misalkan \(X_1,\dots,X_n\) sampel acak yang fungsi kepadatannya bergantung pada parameter \(\theta\in\Omega\) yang tidak diketahui. Menaksir \(\theta\) dengan sebuah [[statistik|statistik]] disebut penaksiran titik. Penaksir yang baik, antara lain, [[takbias|takbias]]. Sebagai pembuka, [[mom|metode momen]] menaksir lewat momen sampel.</p>
 <h2>Penaksir kemungkinan maksimum</h2>
@@ -289,7 +396,15 @@ const C = {
 \[L=\theta^{\sum x_i}(1-\theta)^{n-\sum x_i},\qquad \ell=\textstyle\sum x_i\ln\theta+(n-\sum x_i)\ln(1-\theta)\]
 \[\frac{\partial\ell}{\partial\theta}=\frac{\sum x_i}{\theta}-\frac{n-\sum x_i}{1-\theta}=0\ \Rightarrow\ \hat\theta=\bar X\]
 <h2>Contoh 2: Normal \(N(\theta,1)\)</h2>
-\[\ell=-\tfrac n2\ln 2\pi-\tfrac12\textstyle\sum (x_i-\theta)^2,\qquad \frac{\partial\ell}{\partial\theta}=\sum(x_i-\theta)=0\ \Rightarrow\ \hat\theta=\bar X\]`},
+\[\ell=-\tfrac n2\ln 2\pi-\tfrac12\textstyle\sum (x_i-\theta)^2,\qquad \frac{\partial\ell}{\partial\theta}=\sum(x_i-\theta)=0\ \Rightarrow\ \hat\theta=\bar X\]
+<h2>Sifat invariansi</h2>
+<p>Jika \(\hat\theta\) adalah MLE \(\theta\) dan \(\eta=g(\theta)\), maka MLE \(\eta\) adalah \(g(\hat\theta)\).</p>
+<h2>Contoh soal dan pembahasan</h2>
+<div class="soal"><p><b>Soal.</b> Sampel dari eksponensial \(f(x;\theta)=\frac1\theta e^{-x/\theta}\): 3, 5, 4. Taksir \(\theta\) dan \(P(X>2)\).</p>
+<p><b>Diketahui:</b> \(n=3\), \(\sum x_i=12\).</p>
+<p><b>Ditanyakan:</b> MLE \(\theta\) dan MLE \(P(X>2)\).</p>
+<p><b>Penyelesaian:</b> \(\ell=-n\ln\theta-\frac1\theta\sum x_i\); \(\partial\ell/\partial\theta=0\Rightarrow\hat\theta=\bar x=4\). \(P(X>2)=e^{-2/\theta}\), invariansi: \(e^{-2/4}=0{,}6065\).</p>
+<p><b>Interpretasi:</b> Rata-rata umur diperkirakan 4, dan peluang melebihi 2 diperkirakan 60,65%.</p></div>`},
   {id:"statmat-2",t:"Statistik cukup",h:String.raw`<h2>Gagasan</h2>
 <p>[[suff|Statistik cukup]] merangkum seluruh informasi sampel tentang \(\theta\). Untuk Bernoulli, \(Y=\sum X_i\sim\text{Bin}(n,\theta)\) dan peluang sampel bersyaratnya:</p>
 \[P(X_1=x_1,\dots,X_n=x_n\mid Y=y)=\frac{\theta^{y}(1-\theta)^{n-y}}{\binom ny\theta^{y}(1-\theta)^{n-y}}=\frac1{\binom ny}\]
@@ -302,7 +417,13 @@ const C = {
 <h2>Latihan: Poisson</h2>
 <p>\(Y=\sum X_i\sim\text{Poisson}(n\theta)\) (lewat m.g.f. \(e^{n\theta(e^t-1)}\)). Rasionya:</p>
 \[\frac{\prod \theta^{x_i}e^{-\theta}/x_i!}{(n\theta)^ye^{-n\theta}/y!}=\frac{y!}{n^y\,x_1!\cdots x_n!}\]
-<p>Bebas dari \(\theta\), jadi \(\sum X_i\) cukup. Lewat Neyman: \(\theta^{\sum x}e^{-n\theta}\cdot\dfrac1{\prod x_i!}\).</p>`},
+<p>Bebas dari \(\theta\), jadi \(\sum X_i\) cukup. Lewat Neyman: \(\theta^{\sum x}e^{-n\theta}\cdot\dfrac1{\prod x_i!}\).</p>
+<h2>Contoh soal dan pembahasan</h2>
+<div class="soal"><p><b>Soal.</b> Sampel Poisson(θ): 2, 3, 1, 4. Tunjukkan \(\sum X_i\) statistik cukup dan taksir \(\theta\).</p>
+<p><b>Diketahui:</b> \(n=4\), \(\sum x_i=10\).</p>
+<p><b>Ditanyakan:</b> Statistik cukup dan taksiran.</p>
+<p><b>Penyelesaian:</b> \(Y=\sum X_i\sim\text{Poisson}(n\theta)\) dan rasio kepadatan \(\frac{y!}{n^y\prod x_i!}\) bebas \(\theta\), jadi \(Y\) cukup. \(\hat\theta=Y/n=2{,}5\).</p>
+<p><b>Interpretasi:</b> Cukup mengetahui jumlah 10; urutan data tidak menambah informasi tentang \(\theta\).</p></div>`},
   {id:"statmat-3",t:"Estimasi Bayesian",h:String.raw`<h2>Klasik vs Bayesian</h2>
 <p>Pada MOM dan MLE, \(\theta\) adalah konstanta tak diketahui. Pada pendekatan Bayesian, \(\theta\) adalah peubah acak \(\Theta\) dengan [[prior|prior]] \(h(\theta)\). Setelah data \(x\) diamati, keyakinan diperbarui menjadi [[posterior|posterior]]:</p>
 \[k(\theta\mid x)\propto L(x\mid\theta)\,h(\theta)\]
@@ -313,10 +434,22 @@ const C = {
 \[\delta^*(x)=\frac{x+\alpha}{n+\alpha+\beta}\]
 <p>Ini rata-rata terbobot MLE dan rata-rata prior ([[shrink|shrinkage]]). Untuk \(n=10\), \(x=7\), prior Beta(2,2): \(\delta^*=9/14\approx0{,}643\), sedangkan MLE \(=0{,}7\).</p>
 <h2>Catatan</h2>
-<p>Bayesian fleksibel saat sampel kecil, tetapi hasilnya bergantung pada pilihan prior yang bersifat subjektif.</p>`}]},
+<p>Bayesian fleksibel saat sampel kecil, tetapi hasilnya bergantung pada pilihan prior yang bersifat subjektif.</p>
+<h2>Contoh soal dan pembahasan</h2>
+<div class="soal"><p><b>Soal.</b> Dari \(n=10\) percobaan diperoleh \(x=7\) sukses; prior Beta(2,2). Taksir \(\theta\) dengan kerugian kuadratik.</p>
+<p><b>Diketahui:</b> \(n=10\), \(x=7\), \(\alpha=\beta=2\).</p>
+<p><b>Ditanyakan:</b> Penaksir Bayes.</p>
+<p><b>Penyelesaian:</b> Posterior Beta(\(x+\alpha,n-x+\beta\)) = Beta(9, 5). \(\delta^*=\frac{9}{14}\approx0{,}643\).</p>
+<p><b>Interpretasi:</b> Taksiran 0,643 ditarik dari MLE 0,7 ke arah prior 0,5 (shrinkage).</p></div>`}]},
  pma:{t:"Pengantar Matematika Aktuaria",ch:[
   {id:"pma-1",t:"Model kematian dan peluang",h:String.raw`<h2>Model kematian</h2>
-<p>Semua perhitungan berawal dari [[mort|tabel mortalitas]], yang memberi [[tpx|peluang hidup]] dan [[qx|peluang meninggal]]. Peluang meninggal tertunda adalah [[kdq|k|q_x]].</p>`},
+<p>Semua perhitungan berawal dari [[mort|tabel mortalitas]], yang memberi [[tpx|peluang hidup]] dan [[qx|peluang meninggal]]. Peluang meninggal tertunda adalah [[kdq|k|q_x]].</p>
+<h2>Contoh soal dan pembahasan</h2>
+<div class="soal"><p><b>Soal.</b> Tabel mortalitas: \(\ell_{60}=90.000\), \(\ell_{65}=85.000\). Hitung peluang seseorang berusia 60 hidup sampai 65 dan meninggal sebelum 65.</p>
+<p><b>Diketahui:</b> \(\ell_{60}\), \(\ell_{65}\).</p>
+<p><b>Ditanyakan:</b> \({}_5p_{60}\) dan \({}_5q_{60}\).</p>
+<p><b>Penyelesaian:</b> \({}_5p_{60}=\frac{85.000}{90.000}=0{,}9444\); \({}_5q_{60}=1-0{,}9444=0{,}0556\).</p>
+<p><b>Interpretasi:</b> Sekitar 94,4% orang berusia 60 diharapkan hidup 5 tahun lagi dan 5,6% meninggal.</p></div>`},
   {id:"pma-2",t:"Asuransi jiwa: annual case (Pert. 9)",h:String.raw`<p>Santunan dibayar di akhir tahun kematian. [[pvrv|Z]] adalah nilai sekarang manfaat; kematian di tahun ke-\(k+1\) berarti \(K_x=k\) dan dibayar di waktu \(k+1\).</p>
 <h2>Berjangka ([[term|term]])</h2>
 \[Z=\begin{cases}v^{K_x+1},&K_x=0,\dots,n-1\\0,&K_x\ge n\end{cases}\qquad A^1_{x:\overline n|}=\sum_{k=0}^{n-1}v^{k+1}\,{}_{k|}q_x\]
@@ -328,7 +461,13 @@ const C = {
 <h2>[[endow|Endowment]]</h2>
 \[Z=v^{\min(K_x+1,\,n)},\qquad A_{x:\overline n|}=A^1_{x:\overline n|}+{}_nE_x\]
 <h2>[[tunda|Seumur hidup tunda]]</h2>
-\[{}_{n|}A_x=\sum_{k=n}^{\infty}v^{k+1}\,{}_{k|}q_x=v^n\,{}_np_x\,A_{x+n}\]`},
+\[{}_{n|}A_x=\sum_{k=n}^{\infty}v^{k+1}\,{}_{k|}q_x=v^n\,{}_np_x\,A_{x+n}\]
+<h2>Contoh soal dan pembahasan</h2>
+<div class="soal"><p><b>Soal.</b> Asuransi berjangka 2 tahun, manfaat 1.000 di akhir tahun kematian, \(q_x=0{,}01\), \(q_{x+1}=0{,}02\), \(i=5\%\).</p>
+<p><b>Diketahui:</b> \(q_x=0{,}01\), \(q_{x+1}=0{,}02\), \(i=5\%\), \(b=1000\).</p>
+<p><b>Ditanyakan:</b> Premi tunggal bersih \(1000A^1_{x:\overline{2}|}\).</p>
+<p><b>Penyelesaian:</b> \(A^1_{x:\overline{2}|}=vq_x+v^2p_xq_{x+1}=\frac{0{,}01}{1{,}05}+\frac{0{,}99(0{,}02)}{1{,}1025}=0{,}027483\). Premi \(=27{,}48\).</p>
+<p><b>Interpretasi:</b> Premi tunggal bersih Rp27,48 per Rp1.000 manfaat; premi nyata lebih besar karena biaya dan laba.</p></div>`},
   {id:"pma-3",t:"Momen, 1/m tahunan, UDD, percepatan klaim (Pert. 10)",h:String.raw`<h2>Momen kedua dan variansi</h2>
 <p>[[mom2|Momen kedua]] dihitung seperti rata-rata tetapi dengan \(v^2\) di dalam jumlahan. Setara dengan mengganti \(\delta\) menjadi \(2\delta\), atau \(i\) menjadi \((1+i)^2-1\).</p>
 \[{}^2A^1_{x:\overline n|}=\sum_{k=0}^{n-1}v^{2(k+1)}{}_{k|}q_x,\quad {}_n^2E_x=v^{2n}{}_np_x,\quad {}^2A_{x:\overline n|}={}^2A^1_{x:\overline n|}+v^{2n}{}_np_x\]
@@ -342,7 +481,13 @@ const C = {
 \[E[Z]=10(0{,}1v+0{,}18v^2)\approx2{,}585,\quad E[Z^2]=100(0{,}1v^2+0{,}18v^4)\approx23{,}879\]
 \[\operatorname{Var}(Z)\approx23{,}879-2{,}585^2\approx17{,}20\]
 <p><b>\(\ell_x=\sqrt{144-x}\), \(i=6\%\), hitung \(1000A^1_{50:\overline3|}\).</b> Dengan \(d_x=\ell_x-\ell_{x+1}\):</p>
-\[1000\sum_{k=0}^{2}v^{k+1}\frac{d_{50+k}}{\ell_{50}}\approx14{,}3\ \ (\text{pilihan B})\]`},
+\[1000\sum_{k=0}^{2}v^{k+1}\frac{d_{50+k}}{\ell_{50}}\approx14{,}3\ \ (\text{pilihan B})\]
+<h2>Contoh soal dan pembahasan</h2>
+<div class="soal"><p><b>Soal.</b> Dengan UDD dan \(i=5\%\), diketahui \(A_x=0{,}4\). Hitung \(\bar A_x\).</p>
+<p><b>Diketahui:</b> \(A_x=0{,}4\), \(i=5\%\), UDD.</p>
+<p><b>Ditanyakan:</b> \(\bar A_x\).</p>
+<p><b>Penyelesaian:</b> \(\delta=\ln1{,}05=0{,}04879\); \(\bar A_x=\frac{i}{\delta}A_x=1{,}02479(0{,}4)=0{,}4099\).</p>
+<p><b>Interpretasi:</b> Pembayaran saat meninggal sedikit lebih mahal (0,4099) daripada akhir tahun kematian (0,4).</p></div>`},
   {id:"pma-4",t:"Anuitas hidup (Pert. 11)",h:String.raw`<h2>Review: anuitas pasti</h2>
 <p>[[acm|Anuitas pasti]] 1 per tahun selama n tahun, di awal atau di akhir periode, tahunan, m kali setahun, atau kontinu:</p>
 \[\ddot a_{\overline n|}=\tfrac{1-v^n}{d},\quad a_{\overline n|}=\tfrac{1-v^n}{i},\quad \ddot a^{(m)}_{\overline n|}=\tfrac{1-v^n}{d^{(m)}},\quad a^{(m)}_{\overline n|}=\tfrac{1-v^n}{i^{(m)}},\quad \bar a_{\overline n|}=\tfrac{1-v^n}{\delta}\]
@@ -356,18 +501,38 @@ const C = {
 <p><b>\(\ddot a_{60:\overline3|}\)</b> dengan \(q_{60}=0{,}11\), \(q_{61}=0{,}13\), \(i=4\%\):</p>
 \[\ddot a_{60:\overline3|}=1+\frac{0{,}89}{1{,}04}+\frac{0{,}89\cdot0{,}87}{1{,}04^2}\approx2{,}5717\]
 <p><b>Diketahui \({}_{20}E_x=0{,}35\), \({}_{20}q_x=0{,}3\), \(A^1_{x:\overline{20}|}=0{,}2\); cari \(\ddot a_{x:\overline{20}|}\).</b> Karena \({}_{20}p_x=0{,}7\), \(v^{20}=0{,}35/0{,}7=0{,}5\), jadi \(d=1-0{,}5^{1/20}\approx0{,}03406\). \(A_{x:\overline{20}|}=0{,}2+0{,}35=0{,}55\), sehingga:</p>
-\[\ddot a_{x:\overline{20}|}=\frac{1-0{,}55}{d}\approx13{,}21\]`},
-  {id:"pma-5",t:"Cheatsheet: notasi asuransi jiwa",h:String.raw`<p>Manfaat 1 satuan, dibayar di akhir tahun kematian kecuali ada tanda bar. \(x\) umur peserta, \(n\) jangka waktu, \(m\) masa tunda, \(v=1/(1+i)\), \(d=iv\), \(\delta=\ln(1+i)\).</p>
-<h2>Cara cepat menghafal simbol</h2>
-<ul><li>Bar di atas A: bayar saat meninggal (kontinu)</li><li>Angka 1 di atas x: term (meninggal dulu)</li><li>Angka 1 di atas n|: pure endowment (bertahan hidup)</li><li>Tanpa angka: endowment (gabungan keduanya)</li><li>2 di kiri atas: momen kedua</li><li>m| di kiri bawah: ditunda m tahun</li><li>(I) atau (D): manfaat naik atau turun</li><li>xy: joint life; bar di atas xy: last survivor</li></ul>
-<h2>Rumus kunci</h2>
-<p>[[rekursi|Rekursi dan hubungan anuitas]], serta premi netto seumur hidup \(P_x=A_x/\ddot a_x\) ([[premi|premi bersih]]).</p>`},
+\[\ddot a_{x:\overline{20}|}=\frac{1-0{,}55}{d}\approx13{,}21\]
+<h2>Contoh soal dan pembahasan</h2>
+<div class="soal"><p><b>Soal.</b> Pensiun Rp1.000.000 dibayar di awal tahun selama hidup, maksimum 2 tahun, \(q_x=0{,}01\), \(i=5\%\).</p>
+<p><b>Diketahui:</b> \(p_x=0{,}99\), \(i=5\%\), \(n=2\).</p>
+<p><b>Ditanyakan:</b> Nilai sekarang aktuaria.</p>
+<p><b>Penyelesaian:</b> \(\ddot a_{x:\overline{2}|}=1+vp_x=1+\frac{0{,}99}{1{,}05}=1{,}9429\). Nilai \(=1.942.857\).</p>
+<p><b>Interpretasi:</b> Nilainya sedikit di bawah 2 juta karena pembayaran kedua hanya terjadi bila peserta hidup dan didiskon.</p></div>`},
+  {id:"pma-5",t:"Cheatsheet: notasi asuransi jiwa",h:String.raw`<p>Arahkan kursor ke nama produk atau konsep; rumus dan penjelasan langsung muncul. Manfaat 1 satuan; \(x\) umur, \(n\) jangka waktu, \(m\) masa tunda, \(v=1/(1+i)\), \(d=iv\).</p>
+<h2>Jenis asuransi</h2>
+<ul><li>[[wl|Seumur hidup (whole life)]]</li><li>[[term|Berjangka (term)]]</li><li>[[pe|Dwiguna murni (pure endowment)]]</li><li>[[endow|Dwiguna (endowment)]]</li><li>[[tunda|Ditunda (deferred)]]</li><li>[[naik|Manfaat naik atau turun]]</li></ul>
+<h2>Waktu dan distribusi pembayaran</h2>
+<ul><li>[[kontinu|Dibayar saat meninggal (kontinu)]]</li><li>[[udd|Asumsi UDD]]</li><li>[[mthly|Dibayar 1/m tahunan]]</li><li>[[mom2|Momen kedua]]</li></ul>
+<h2>Anuitas, premi, dan cadangan</h2>
+<ul><li>[[hidup|Anuitas hidup]]</li><li>[[aterm|Anuitas berjangka]]</li><li>[[adefer|Anuitas ditunda]]</li><li>[[joint|Joint life]]</li><li>[[premi|Premi bersih]]</li><li>[[rekursi|Rekursi]]</li><li>[[cadangan|Cadangan]]</li></ul>
+<h2>Contoh soal dan pembahasan</h2>
+<div class="soal"><p><b>Soal.</b> Pada \(i=5\%\), \(\ddot a_x=15\). Tentukan \(A_x\) dan premi bersih tahunan seumur hidup \(P_x\).</p>
+<p><b>Diketahui:</b> \(i=5\%\), \(\ddot a_x=15\).</p>
+<p><b>Ditanyakan:</b> \(A_x\), \(P_x\).</p>
+<p><b>Penyelesaian:</b> \(d=0{,}05/1{,}05=0{,}047619\). \(A_x=1-d\ddot a_x=1-0{,}7143=0{,}2857\). \(P_x=A_x/\ddot a_x=0{,}019048\).</p>
+<p><b>Interpretasi:</b> Premi tahunan sekitar 1,9% dari manfaat.</p></div>`},
   {id:"pma-6",t:"Joint life, manfaat berubah, cadangan",h:String.raw`<h2>Beberapa jiwa</h2>
 <p>[[joint|Joint life dan last survivor]] untuk dua jiwa \(x\) dan \(y\).</p>
 <h2>Manfaat berubah</h2>
 <p>[[naik|Manfaat naik atau turun]] memakai notasi \((IA)\) dan \((DA)\). Rekursi: \((IA)_x=vq_x+vp_x[(IA)_{x+1}+A_{x+1}]\).</p>
 <h2>Cadangan</h2>
-<p>[[cadangan|Cadangan]] prospektif = nilai sekarang manfaat mendatang dikurangi nilai sekarang premi mendatang.</p>`}]}
+<p>[[cadangan|Cadangan]] prospektif = nilai sekarang manfaat mendatang dikurangi nilai sekarang premi mendatang.</p>
+<h2>Contoh soal dan pembahasan</h2>
+<div class="soal"><p><b>Soal.</b> Lanjutan: \(P_x=0{,}019048\) dan setelah \(t\) tahun \(\ddot a_{x+t}=14\) (\(i=5\%\)). Hitung cadangan prospektif.</p>
+<p><b>Diketahui:</b> \(P=0{,}019048\), \(\ddot a_{x+t}=14\), \(d=0{,}047619\).</p>
+<p><b>Ditanyakan:</b> \({}_tV\).</p>
+<p><b>Penyelesaian:</b> \(A_{x+t}=1-14(0{,}047619)=0{,}3333\). \({}_tV=A_{x+t}-P\ddot a_{x+t}=0{,}3333-0{,}2667=0{,}0667\).</p>
+<p><b>Interpretasi:</b> Perusahaan harus menyimpan 6,67% manfaat per polis; sama dengan \(1-\ddot a_{x+t}/\ddot a_x\).</p></div>`}]}
 };
 const flat={}; Object.entries(C).forEach(([k,c])=>c.ch.forEach(x=>flat[x.id]={...x,k}));
 const pick=document.getElementById('pick'), chap=document.getElementById('chap');
