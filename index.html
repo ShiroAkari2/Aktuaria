@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
-<head> 
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Catatan Aktuaria</title>
@@ -34,6 +34,7 @@ main ul{font-size:17px;line-height:1.7;padding-left:22px}
 .pick:focus-visible{outline:2px solid var(--accent)}
 main table{display:block;overflow-x:auto;border-collapse:collapse;font:15px Inter,system-ui,sans-serif;margin:14px 0}main th,main td{border-bottom:1px solid var(--line);padding:6px 12px;text-align:right}main th{color:var(--accent)}
 .soal{border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:6px;padding:2px 18px;margin:12px 0;background:var(--card);font:16px/1.65 Inter,system-ui,sans-serif}.soal p{margin:10px 0}
+.by{font:12px/1 Inter,system-ui,sans-serif;letter-spacing:.08em;color:var(--muted);margin:0 0 14px}
 </style>
 </head>
 <body>
@@ -131,7 +132,13 @@ const T = {
  konvd:{n:'Konvergen dalam distribusi',d:'Fungsi distribusi F_n(x) menuju F(x) di setiap titik kontinu F. Lebih lemah dari [[konvp|konvergen dalam peluang]].',f:String.raw`X_n\xrightarrow{D}X\iff F_n(x)\to F(x)\ \text{di titik kontinu }F`,e:'Z_n = (X̄ₙ − μ)/(σ/√n) → N(0,1) dalam distribusi (CLT).'},
  slutsky:{n:'Teorema Slutsky',d:'Jika X_n → X dalam distribusi dan Y_n → c dalam peluang (c konstanta), jumlah, hasil kali, dan hasil bagi tetap konvergen.',f:String.raw`X_n+Y_n\xrightarrow{D}X+c,\quad X_nY_n\xrightarrow{D}cX,\quad X_n/Y_n\xrightarrow{D}X/c\ (c\ne0)`,e:'Mengganti σ dengan s pada statistik z tetap memberi limit N(0,1).'},
  delta:{n:'Metode delta',d:'Distribusi limit fungsi dari penaksir yang sudah diketahui distribusi limitnya.',f:String.raw`\sqrt n(\hat\theta-\theta)\xrightarrow{D}N(0,\sigma^2)\Rightarrow\sqrt n(g(\hat\theta)-g(\theta))\xrightarrow{D}N\big(0,[g\prime(\theta)]^2\sigma^2\big)`,e:'g(θ) = θ²: varians limit = (2θ)²σ².'},
- kkon:{n:'Koreksi kontinuitas',d:'Binomial diskrit dihampiri normal kontinu dengan menggeser batas sebesar 0,5. Syarat: np ≥ 5 dan n(1−p) ≥ 5.',f:String.raw`P(X\le k)\approx P\!\left(Z\le\frac{k+0{,}5-np}{\sqrt{np(1-p)}}\right)`,e:'n = 100, p = 0,1, k = 12: Z = 2,5/3 ≈ 0,83, peluang ≈ 0,7967.'}
+ kkon:{n:'Koreksi kontinuitas',d:'Binomial diskrit dihampiri normal kontinu dengan menggeser batas sebesar 0,5. Syarat: np ≥ 5 dan n(1−p) ≥ 5.',f:String.raw`P(X\le k)\approx P\!\left(Z\le\frac{k+0{,}5-np}{\sqrt{np(1-p)}}\right)`,e:'n = 100, p = 0,1, k = 12: Z = 2,5/3 ≈ 0,83, peluang ≈ 0,7967.'},
+ alm:{n:'Asset-liability matching (ALM)',d:'Mengelola aset dan liabilitas secara terpadu agar klaim dan manfaat polis selalu dapat dibayar. Dua cara utama: [[cfm|cash flow matching]] dan duration matching ([[redington|imunisasi Redington]]).',f:String.raw`PV(\text{aset})\ \ge\ PV(\text{liabilitas})`,e:'Perusahaan asuransi jiwa menyusun portofolio obligasi sesuai jadwal klaim polisnya.'},
+ cfm:{n:'Cash flow matching',d:'Arus kas aset disusun persis sama (jumlah dan waktu) dengan arus kas liabilitas, sehingga bebas risiko bunga. Mudah dipahami tetapi sulit dipenuhi sepenuhnya.',f:String.raw`CF^{A}_t=CF^{L}_t\ \ \text{untuk setiap }t`,e:'Liabilitas 1.000 di tahun ke-4: beli zero-coupon bernilai tebus 1.000 jatuh tempo tahun ke-4.'},
+ dur:{n:'Durasi (Macaulay dan modifikasi)',d:'Rata-rata waktu pembayaran yang dibobot nilai sekarangnya; ukuran sensitivitas harga terhadap bunga. Durasi modifikasi menaksir perubahan harga relatif.',f:String.raw`D=\frac{\sum t\,v^tCF_t}{P},\quad D_{mod}=\frac{D}{1+i},\quad \frac{\Delta P}{P}\approx-D_{mod}\,\Delta i`,e:'Zero-coupon 4 tahun: D = 4; i = 5% memberi D_mod ≈ 3,81.'},
+ konv:{n:'Konveksitas',d:'Kelengkungan hubungan harga dan bunga; koreksi orde dua untuk perkiraan durasi. Konveksitas lebih besar menguntungkan saat bunga bergerak ke arah mana pun.',f:String.raw`C=\frac{\sum t(t+1)\,v^{t+2}CF_t}{P},\quad \frac{\Delta P}{P}\approx-D_{mod}\Delta i+\tfrac12C\,\Delta i^2`,e:'Zero-coupon 4 tahun, i = 5%: C = 20/1,05² ≈ 18,14.'},
+ redington:{n:'Imunisasi Redington',d:'Tiga syarat agar surplus aset terhadap liabilitas tidak turun akibat pergeseran bunga kecil: nilai sekarang sama, [[dur|durasi]] sama, dan [[konv|konveksitas]] aset lebih besar.',f:String.raw`PV_A=PV_L,\qquad D_A=D_L,\qquad C_A>C_L`,e:'Aset zero-coupon 2 dan 6 tahun (bobot 50:50) meng-imunisasi liabilitas di tahun ke-4.'},
+ dgap:{n:'Duration gap',d:'Selisih durasi aset dan durasi liabilitas (disesuaikan rasio nilainya). Dipantau berkala; gap nol berarti surplus kebal terhadap pergeseran paralel kecil.',f:String.raw`\text{gap}=D_A-\frac{PV_L}{PV_A}D_L`,e:'Bila D_A = D_L dan PV_A = PV_L, gap = 0.'}
 };
 const link = s => s.replace(/\[\[(\w+)\|([^\]]+)\]\]/g,'<span class="term" data-t="$1">$2</span>');
 
@@ -340,7 +347,24 @@ const C = {
 <p><b>Diketahui:</b> \(F=C=100\), \(Fr=6\), \(P=101{,}9143\), \(s_1=4\%\).</p>
 <p><b>Ditanyakan:</b> \(s_2\) dan forward \(f_{1,2}\).</p>
 <p><b>Penyelesaian:</b> \(P-\frac{6}{1{,}04}=96{,}1451\). \(1+s_2=\sqrt{106/96{,}1451}=1{,}05\Rightarrow s_2=5\%\). \(f_{1,2}=\frac{1{,}05^2}{1{,}04}-1\approx6{,}01\%\).</p>
-<p><b>Interpretasi:</b> Kurva imbal hasil menaik (4% ke 5%); pasar mengimplikasikan bunga 6,01% untuk tahun kedua.</p></div>`}]},
+<p><b>Interpretasi:</b> Kurva imbal hasil menaik (4% ke 5%); pasar mengimplikasikan bunga 6,01% untuk tahun kedua.</p></div>`},
+  {id:"matkeu-6",t:"Strategi asset-liability matching (ALM)",h:String.raw`<h2>Pengertian</h2>
+<p>[[alm|ALM]] adalah pengelolaan aset dan liabilitas secara terpadu agar klaim dan manfaat polis selalu dapat dibayar. Saat suku bunga turun, hasil reinvestasi menurun, tetapi nilai aset yang masih dipegang naik dan mengimbanginya.</p>
+<h2>Cash flow matching</h2>
+<p>[[cfm|Cash flow matching]]: arus kas aset disusun persis sama dengan arus kas liabilitas. Paling mudah dipahami, tetapi jarang dapat dipenuhi penuh karena obligasi yang tersedia terbatas.</p>
+<h2>Duration matching dan imunisasi Redington</h2>
+<p>Durasi portofolio obligasi disamakan dengan durasi liabilitas sehingga nilai aset mengikuti nilai liabilitas. Dengan [[dur|durasi]] \(D=\frac{\sum t\,v^tCF_t}{P}\) dan [[konv|konveksitas]] \(C=\frac{\sum t(t+1)v^{t+2}CF_t}{P}\), perubahan harga dihampiri \(\frac{\Delta P}{P}\approx-\frac{D}{1+i}\Delta i+\frac12C\Delta i^2\). [[redington|Syarat Redington]]:</p>
+\[PV_A=PV_L,\qquad D_A=D_L,\qquad C_A>C_L\]
+<h2>Diversifikasi investasi</h2>
+<p><b>Asuransi jiwa:</b> liabilitas bersifat nominal, didukung portofolio yang didominasi obligasi. <b>Asuransi umum:</b> liabilitas sensitif inflasi, cocok dengan saham dan obligasi jangka panjang. <b>Multi-liabilitas:</b> sebaran durasi aset harus lebih lebar dari durasi liabilitas.</p>
+<h2>Mitigasi risiko</h2>
+<p>Durasi saja tidak cukup bila kurva imbal hasil bergeser tidak paralel. Maka: kendalikan konveksitas portofolio aset, pantau [[dgap|duration gap]] secara berkala, dan gunakan ukuran yang lebih lengkap seperti partial duration (sensitivitas terhadap titik tertentu pada kurva imbal hasil).</p>
+<h2>Contoh soal dan pembahasan</h2>
+<div class="soal"><p><b>Soal.</b> Liabilitas Rp1.000 jatuh tempo 4 tahun lagi, \(i=5\%\). Aset berupa zero-coupon 2 tahun dan 6 tahun. Susun portofolio duration matching, uji syarat Redington, lalu bandingkan nilai aset dan liabilitas bila bunga naik ke 6% atau turun ke 4%.</p>
+<p><b>Diketahui:</b> \(L=1000\) di \(t=4\), \(i=5\%\), aset zero-coupon \(t=2\) dan \(t=6\).</p>
+<p><b>Ditanyakan:</b> Bobot aset, syarat Redington, dan surplus pada \(i=6\%\) dan \(i=4\%\).</p>
+<p><b>Penyelesaian:</b> \(PV_L=1000/1{,}05^4=822,70\), \(D_L=4\). Bobot nilai sekarang \(w\) pada 2 tahun: \(2w+6(1-w)=4\Rightarrow w=0{,}5\). Nilai tebus: 2 tahun \(=453,51\), 6 tahun \(=551,25\). Konveksitas: \(C_L=20/1{,}05^2=18,14\), \(C_A=\frac{0{,}5(6)+0{,}5(42)}{1{,}05^2}=21,77\gt C_L\). Bunga 6%: \(PV_A=792,24\), \(PV_L=792,09\). Bunga 4%: \(PV_A=854,96\), \(PV_L=854,80\).</p>
+<p><b>Interpretasi:</b> Ketiga syarat Redington terpenuhi, dan surplus aset terhadap liabilitas tetap positif ketika bunga naik maupun turun. Jika konveksitas aset lebih kecil dari liabilitas, surplus bisa negatif.</p></div>`}]},
  statmat:{t:"Statistika Matematika",ch:[
   {id:"statmat-c1",t:"Teorema limit pusat dan hampiran normal (Pekan 3–4)",h:String.raw`<h2>Teorema limit pusat</h2>
 <p>Misalkan \(X_1,\dots,X_n\) iid dengan mean \(\mu\) dan varians \(\sigma^2\). Menurut [[clt|CLT]], untuk \(n\) besar:</p>
@@ -540,7 +564,7 @@ function show(id){
  const ch=flat[id]||flat['matkeu-1'], k=ch.k; closeFrom(0);
  pick.value=k; chap.innerHTML=C[k].ch.map((x,i)=>'<option value="'+x.id+'">Bab '+(i+1)+': '+x.t+'</option>').join(''); chap.value=ch.id;
  const el=document.getElementById('content');
- el.innerHTML='<p class="crs">'+C[k].t+'</p><h1>'+ch.t+'</h1><div class="hint">Arahkan kursor ke kata bertitik-titik untuk melihat definisi dan rumusnya.</div>'+link(ch.h);
+ el.innerHTML='<p class="by">By ShiroAkari</p><p class="crs">'+C[k].t+'</p><h1>'+ch.t+'</h1><div class="hint">Arahkan kursor ke kata bertitik-titik untuk melihat definisi dan rumusnya.</div>'+link(ch.h);
  document.title=ch.t+' · Catatan Aktuaria'; try{ if(location.hash!=='#'+ch.id) history.replaceState(null,'','#'+ch.id); }catch(e){} scrollTo(0,0);
  if(window.MathJax&&MathJax.typesetPromise) MathJax.typesetPromise([el]);
 }
