@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Catatan Aktuaria</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;600&display=swap">
+<script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},svg:{fontCache:'global'},startup:{typeset:false}};</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script>
+<style>
+:root{--bg:#f4f6f8;--ink:#1b2433;--muted:#5d6878;--accent:#0f5c63;--card:#fff;--line:#d5dbe3;--chip:#e3f0f1;--shadow:0 8px 28px rgba(20,30,50,.18);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12171f;--ink:#e6eaf0;--muted:#98a3b3;--accent:#6cc4cc;--card:#1b222d;--line:#323c4b;--chip:#1d3a3e;--shadow:0 8px 28px rgba(0,0,0,.5)}}
+:root[data-theme="dark"]{--bg:#12171f;--ink:#e6eaf0;--muted:#98a3b3;--accent:#6cc4cc;--card:#1b222d;--line:#323c4b;--chip:#1d3a3e;--shadow:0 8px 28px rgba(0,0,0,.5)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:19px/1.75 "Source Serif 4",Georgia,serif}
+main{max-width:680px;margin:0 auto;padding:56px 24px 96px}
+h1{font-size:34px;line-height:1.2;margin:0 0 8px;font-weight:600}
+h2{font-size:22px;margin:44px 0 6px;font-weight:600}
+.hint{font:15px/1.5 Inter,system-ui,sans-serif;color:var(--muted);background:var(--chip);padding:10px 14px;border-radius:6px;margin:16px 0 8px}
+.term{color:var(--accent);border-bottom:2px dotted var(--accent);cursor:help}
+.term:hover{background:var(--chip)}
+.card{position:fixed;z-index:50;width:360px;max-width:92vw;background:var(--card);border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:6px;box-shadow:var(--shadow);padding:14px 16px;font:15px/1.6 Inter,system-ui,sans-serif;color:var(--ink)}
+.card h3{margin:0 0 4px;font-size:16px;font-weight:600;color:var(--accent)}
+.card p{margin:0 0 8px}
+.card .lbl{font-size:13px;color:var(--muted);margin:8px 0 0}
+.card .f{overflow-x:auto;background:var(--bg);border-radius:4px;padding:2px 8px;margin:4px 0}
+.card .ex{border-left:3px solid var(--line);padding-left:10px;color:var(--muted);margin-top:4px}
+mjx-container{color:inherit}
+.pick{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:16px;z-index:60;font:600 14px Inter,system-ui,sans-serif;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:8px 10px;box-shadow:var(--shadow);cursor:pointer}
+.picks{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:16px;z-index:60;display:flex;gap:8px}
+.pick{position:static!important;max-width:260px}
+.crs{font:600 15px Inter,system-ui,sans-serif;color:var(--accent);margin:0}
+main ul{font-size:17px;line-height:1.7;padding-left:22px}
+.pick:focus-visible{outline:2px solid var(--accent)}
+main table{display:block;overflow-x:auto;border-collapse:collapse;font:15px Inter,system-ui,sans-serif;margin:14px 0}main th,main td{border-bottom:1px solid var(--line);padding:6px 12px;text-align:right}main th{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="picks"><select class="pick" id="pick" aria-label="Pilih mata kuliah"><option value="matkeu">Matematika Keuangan</option><option value="statmat">Statistika Matematika</option><option value="pma">Pengantar Matematika Aktuaria</option></select><select class="pick" id="chap" aria-label="Pilih bab"></select></div>
+<main><div id="content"></div></main>
+
+<script>
+const T = {
+ bunga:{n:"Suku bunga efektif (i)",d:"Persentase pertambahan uang dalam satu periode. Dipakai sebagai dasar untuk menghitung [[v|faktor diskonto]].",f:String.raw`i=\frac{A(1)-A(0)}{A(0)}`,e:"Rp100.000 menjadi Rp105.000 dalam setahun, maka i = 5%."},
+ v:{n:"Faktor diskonto (v)",d:"Nilai sekarang dari Rp1 yang akan diterima satu periode lagi, dihitung dari [[bunga|suku bunga efektif]].",f:String.raw`v=\frac{1}{1+i},\qquad d=iv=1-v`,e:"Untuk i = 5%, v = 1/1,05 ≈ 0,9524."},
+ pv:{n:"Nilai sekarang (PV)",d:"Nilai hari ini dari pembayaran di masa depan, setelah didiskontokan dengan [[v|faktor diskonto]].",f:String.raw`PV=C\,v^{t}`,e:"Rp1.000.000 yang diterima 3 tahun lagi dengan i = 5%: 1.000.000 × 1,05⁻³ ≈ Rp863.838."},
+ anuitas:{n:"Anuitas",d:"Rangkaian pembayaran dalam jumlah tertentu pada selang waktu yang teratur. Nilainya dihitung dengan menjumlahkan [[pv|nilai sekarang]] tiap pembayaran.",f:String.raw`a_{\overline{n}|}=v+v^2+\cdots+v^n`,e:"Gaji pensiun bulanan, cicilan rumah, atau kupon obligasi."},
+ pasti:{n:"Anuitas pasti (annuity-certain)",d:"Anuitas yang pembayarannya pasti terjadi selama n periode, tanpa bergantung pada hidup atau matinya seseorang. Pembayaran di akhir periode.",f:String.raw`a_{\overline{n}|}=\frac{1-v^n}{i}`,e:"Cicilan Rp1 selama 10 tahun dengan i = 5%: a = (1 − 1,05⁻¹⁰)/0,05 ≈ 7,7217."},
+ awal:{n:"Anuitas awal (annuity-due)",d:"Anuitas dengan pembayaran di awal setiap periode, jadi tiap pembayaran satu periode lebih dekat dengan sekarang daripada [[pasti|anuitas pasti]].",f:String.raw`\ddot a_{\overline{n}|}=\frac{1-v^n}{d}=(1+i)\,a_{\overline{n}|}`,e:"Sewa yang dibayar di muka setiap bulan."},
+ mort:{n:"Tabel mortalitas",d:"Tabel yang menunjukkan berapa orang dari kelompok awal yang masih hidup pada setiap usia. Dasar untuk menghitung [[tpx|peluang hidup]].",f:String.raw`\ell_x=\text{jumlah orang hidup pada usia }x`,e:"Jika ℓ₆₀ = 90.000 dan ℓ₆₅ = 85.000, maka 5 tahun dari usia 60 ada 5.000 orang yang meninggal."},
+ tpx:{n:"Peluang hidup (tpx)",d:"Peluang seseorang berusia x masih hidup t tahun lagi, dibaca dari [[mort|tabel mortalitas]].",f:String.raw`{}_tp_x=\frac{\ell_{x+t}}{\ell_x}`,e:"Dari contoh tabel di atas, ₅p₆₀ = 85.000/90.000 ≈ 0,9444."},
+ hidup:{n:"Anuitas hidup",d:"Anuitas yang dibayar selama penerimanya masih hidup. Tiap pembayaran didiskontokan dengan [[v|v]] dan dikalikan [[tpx|peluang hidup]].",f:String.raw`\ddot a_x=\sum_{k=0}^{\infty} v^{k}\,{}_kp_x`,e:"Pensiun seumur hidup yang dibayar awal tiap tahun."},
+
+ sederhana:{n:"Bunga sederhana",d:"Bunga yang dihitung hanya dari pokok awal, tidak berbunga lagi. Bandingkan dengan [[majemuk|bunga majemuk]].",f:String.raw`A(t)=A(0)\,(1+it)`,e:"Rp100.000, i = 5%, 3 tahun: 100.000 × (1 + 0,15) = Rp115.000."},
+ majemuk:{n:"Bunga majemuk",d:"Bunga yang ikut berbunga di periode berikutnya. Dasar dari [[bunga|suku bunga efektif]] dan [[v|faktor diskonto]].",f:String.raw`A(t)=A(0)\,(1+i)^t`,e:"Rp100.000, i = 5%, 3 tahun: 100.000 × 1,05³ ≈ Rp115.763."},
+ perpet:{n:"Perpetuitas",d:"[[anuitas|Anuitas]] yang dibayar selamanya. Nilai sekarangnya terbatas karena [[v|v]] makin kecil.",f:String.raw`a_{\overline{\infty}|}=\frac{1}{i}`,e:"Pembayaran Rp1 per tahun selamanya dengan i = 5% bernilai 1/0,05 = Rp20."},
+ rv:{n:"Peubah acak (X)",d:"Fungsi yang memberi angka pada setiap hasil sebuah percobaan acak. Dijelaskan lewat [[cdf|fungsi distribusi]] dan [[pdf|fungsi kepadatan]].",f:String.raw`X:\Omega\to\mathbb{R}`,e:"X = jumlah mata dua dadu yang dilempar, bernilai 2 sampai 12."},
+ cdf:{n:"Fungsi distribusi kumulatif (CDF)",d:"Peluang peubah acak bernilai paling besar x. Selalu naik dari 0 ke 1.",f:String.raw`F(x)=P(X\le x)`,e:"Untuk dadu adil, F(3) = 3/6 = 0,5."},
+ pdf:{n:"Fungsi kepadatan (PDF)",d:"Untuk peubah acak kontinu, luas di bawah kurva antara dua titik adalah peluangnya. Turunan dari [[cdf|CDF]].",f:String.raw`F(x)=\int_{-\infty}^{x} f(t)\,dt,\qquad \int_{-\infty}^{\infty} f(x)\,dx=1`,e:"Seragam pada [0,1]: f(x) = 1, jadi P(X ≤ 0,3) = 0,3."},
+ ekspek:{n:"Ekspektasi E[X]",d:"Rata-rata berbobot peluang dari [[rv|peubah acak]]. Dasar untuk [[varian|variansi]] dan untuk menghitung nilai harapan di aktuaria.",f:String.raw`E[X]=\sum_x x\,p(x)\quad\text{atau}\quad \int x f(x)\,dx`,e:"Satu dadu adil: E[X] = (1+2+…+6)/6 = 3,5."},
+ varian:{n:"Variansi Var(X)",d:"Ukuran sebaran nilai di sekitar [[ekspek|ekspektasi]].",f:String.raw`\operatorname{Var}(X)=E[X^2]-(E[X])^2`,e:"Satu dadu adil: E[X²] = 91/6, jadi Var = 91/6 − 12,25 ≈ 2,9167."},
+ normal:{n:"Distribusi normal",d:"Distribusi berbentuk lonceng dengan rata-rata μ dan variansi σ². Muncul karena [[clt|teorema limit pusat]].",f:String.raw`f(x)=\frac{1}{\sigma\sqrt{2\pi}}\,e^{-\frac{(x-\mu)^2}{2\sigma^2}}`,e:"Sekitar 95% data berada dalam μ ± 1,96σ."},
+ clt:{n:"Teorema limit pusat (CLT)",d:"Rata-rata sampel besar berdistribusi hampir [[normal|normal]], apa pun distribusi asalnya (asal [[varian|variansinya]] berhingga).",f:String.raw`\frac{\bar X-\mu}{\sigma/\sqrt n}\xrightarrow{d}N(0,1)`,e:"Rata-rata 50 lemparan dadu sudah cukup mendekati normal."},
+ estimator:{n:"Estimator",d:"Aturan menghitung nilai parameter dari data sampel. Dikatakan tak bias jika [[ekspek|ekspektasinya]] sama dengan parameter sebenarnya.",f:String.raw`E[\hat\theta]=\theta`,e:"Rata-rata sampel adalah estimator tak bias untuk μ."},
+ mle:{n:"Penduga kemungkinan maksimum (MLE)",d:"[[estimator|Estimator]] yang memilih parameter yang membuat data teramati paling mungkin.",f:String.raw`L(\theta)=\prod_{i=1}^{n} f(x_i;\theta),\qquad \hat\theta=\arg\max_\theta L(\theta)`,e:"Untuk distribusi eksponensial, hasilnya λ̂ = 1/x̄."},
+ qx:{n:"Peluang meninggal (tqx)",d:"Peluang orang berusia x meninggal dalam t tahun. Pelengkap dari [[tpx|peluang hidup]].",f:String.raw`{}_tq_x=1-{}_tp_x`,e:"Jika ₅p₆₀ ≈ 0,9444, maka ₅q₆₀ ≈ 0,0556."},
+ asuransi:{n:"Asuransi jiwa seumur hidup (Aₓ)",d:"Nilai sekarang aktuaria dari santunan Rp1 yang dibayar saat meninggal. Dipakai pada [[premi|premi bersih]].",f:String.raw`A_x=\sum_{k=0}^{\infty} v^{k+1}\,{}_kp_x\,q_{x+k}`,e:"Santunan Rp100 juta: premi tunggal bersih = 100.000.000 × Aₓ."},
+
+ statistik:{n:"Statistik / penaksir / taksiran",d:"Statistik adalah fungsi dari sampel acak. Bila dipakai untuk menaksir parameter θ, ia disebut penaksir; nilai realisasinya disebut taksiran.",f:String.raw`\hat\theta=u(X_1,\dots,X_n)\ \ (\text{penaksir}),\qquad u(x_1,\dots,x_n)\ \ (\text{taksiran})`,e:"X̄ adalah penaksir; X̄ = 4,2 dari data tertentu adalah taksiran."},
+ takbias:{n:"Penaksir takbias",d:"Penaksir yang rata-ratanya tepat sama dengan parameter yang ditaksir.",f:String.raw`E[u(X_1,\dots,X_n)]=\theta`,e:"X̄ takbias untuk μ karena E[X̄] = μ."},
+ mom:{n:"Metode momen",d:"Menyamakan momen sampel dengan momen populasi, lalu menyelesaikan persamaannya untuk θ. Sederhana, tetapi tidak selalu seefisien [[mle|MLE]].",f:String.raw`E[X^k]=\frac1n\sum_{i=1}^{n}X_i^{\,k}`,e:"Eksponensial dengan rata-rata θ: E[X] = θ, jadi θ̂ = X̄."},
+ likelihood:{n:"Fungsi likelihood",d:"Fungsi kepadatan bersama sampel yang dipandang sebagai fungsi dari θ. Dimaksimumkan oleh [[mle|MLE]]; pada Bayesian ia dikalikan dengan [[prior|prior]].",f:String.raw`L(\theta;x_1,\dots,x_n)=\prod_{i=1}^{n}f(x_i;\theta),\quad \theta\in\Omega`,e:"Bernoulli: L = θ^{Σx}(1−θ)^{n−Σx}."},
+ mgf:{n:"Fungsi pembangkit momen (m.g.f.)",d:"Dipakai untuk mencari distribusi jumlah peubah acak bebas: m.g.f. jumlah sama dengan hasil kali m.g.f. masing-masing.",f:String.raw`M_Y(t)=E[e^{tY}],\qquad M_{\sum X_i}(t)=\prod_i M_{X_i}(t)`,e:"Gamma(2, θ): M(t) = (1−θt)⁻², sehingga jumlah n suku punya M(t) = (1−θt)⁻²ⁿ."},
+ suff:{n:"Statistik cukup",d:"Statistik Y yang sudah memuat seluruh informasi tentang θ: peluang sampel bersyarat Y tidak bergantung pada θ. Cara cepat memeriksanya adalah [[neyman|teorema faktorisasi Neyman]].",f:String.raw`\frac{f(x_1;\theta)\cdots f(x_n;\theta)}{g_1(u_1(x_1,\dots,x_n);\theta)}=H(x_1,\dots,x_n)\ \ (\text{bebas }\theta)`,e:"Bernoulli: P(X₁=x₁,…|ΣX=y) = 1/C(n,y), tidak memuat θ, jadi ΣX cukup."},
+ neyman:{n:"Teorema faktorisasi Neyman",d:"Y = u(X) cukup untuk θ jika dan hanya jika fungsi kepadatan bersama dapat difaktorkan dengan satu faktor yang bergantung pada θ hanya lewat u, dan faktor lain bebas dari θ. Dipakai untuk memeriksa [[suff|statistik cukup]].",f:String.raw`\prod_{i} f(x_i;\theta)=k_1\big(u(x_1,\dots,x_n);\theta\big)\,k_2(x_1,\dots,x_n)`,e:"f(x)=θx^{θ−1}: θⁿ(∏x)^θ · 1/∏x, maka ∏Xᵢ cukup."},
+ prior:{n:"Distribusi prior h(θ)",d:"Pada pendekatan Bayesian, θ dipandang sebagai peubah acak Θ. Prior mencerminkan keyakinan awal tentang θ sebelum data diamati.",f:String.raw`\Theta\sim h(\theta)`,e:"Beta(2,2) mencerminkan keyakinan lemah bahwa θ dekat 0,5."},
+ posterior:{n:"Distribusi posterior k(θ|x)",d:"Keyakinan tentang θ setelah data diamati: gabungan [[likelihood|likelihood]] dan [[prior|prior]]. Dasar penentuan [[bayes|penaksir Bayes]].",f:String.raw`k(\theta\mid x)=\frac{L(x\mid\theta)\,h(\theta)}{m(x)}\ \propto\ L(x\mid\theta)\,h(\theta)`,e:"Verbal: posterior ∝ likelihood × prior. m(x) hanya konstanta normalisasi."},
+ loss:{n:"Fungsi kerugian dan risiko posterior",d:"Fungsi kerugian L[θ, δ(x)] mengukur kerugian bila taksiran δ(x) padahal nilai sebenarnya θ. Rata-ratanya terhadap [[posterior|posterior]] disebut risiko posterior.",f:String.raw`\rho(\delta\mid x)=E_{\theta\mid x}\big[L(\theta,\delta(x))\big]=\int_\Omega L(\theta,\delta(x))\,k(\theta\mid x)\,d\theta`,e:"Kuadratik: (θ−δ)²; mutlak: |θ−δ|."},
+ bayes:{n:"Penaksir Bayes",d:"Taksiran yang meminimumkan [[loss|risiko posterior]]. Kerugian kuadratik menghasilkan rata-rata posterior, kerugian mutlak menghasilkan median posterior.",f:String.raw`\delta^*(x)=\arg\min_{\delta}E_{\theta\mid x}[L(\theta,\delta)],\quad \delta^*(x)=E(\theta\mid x)\ \ (\text{kuadratik})`,e:"Kuadratik paling umum karena rata-rata posterior lebih mudah dihitung."},
+ konjugat:{n:"Prior konjugat",d:"Prior yang membuat [[posterior|posterior]] berada dalam keluarga distribusi yang sama dengan prior-nya. Beta konjugat untuk likelihood Binomial.",f:String.raw`X\mid\theta\sim\text{Bin}(n,\theta),\ \theta\sim\text{Beta}(\alpha,\beta)\ \Rightarrow\ \theta\mid x\sim\text{Beta}(x+\alpha,\,n-x+\beta)`,e:"Cukup menambahkan x ke α dan (n−x) ke β."},
+ shrink:{n:"Shrinkage",d:"[[bayes|Penaksir Bayes]] pada model Binomial–Beta adalah rata-rata terbobot antara [[mle|MLE]] dan rata-rata prior. Saat n kecil, taksiran ditarik ke arah prior.",f:String.raw`\delta^*(x)=\frac{n}{n+\alpha+\beta}\cdot\frac{x}{n}+\frac{\alpha+\beta}{n+\alpha+\beta}\cdot\frac{\alpha}{\alpha+\beta}`,e:"n = 10, x = 7, Beta(2,2): 9/14 ≈ 0,643, sedangkan MLE = 0,7."},
+ term:{n:"Asuransi berjangka (term)",d:"Santunan dibayar bila meninggal dalam n tahun. Angka 1 di atas x berarti x harus meninggal lebih dulu. Variasi dari [[asuransi|asuransi jiwa seumur hidup]].",f:String.raw`A^{1}_{x:\overline{n}|}=\sum_{k=0}^{n-1}v^{k+1}\,{}_kp_x\,q_{x+k}`,e:"Santunan hanya jika meninggal dalam 10 tahun pertama."},
+ pe:{n:"Pure endowment",d:"Dibayar hanya jika yang bersangkutan hidup sampai akhir n tahun. Angka 1 di atas n| berarti n harus berakhir lebih dulu.",f:String.raw`A_{x:\overline{n}|}^{\ 1}={}_nE_x=v^n\,{}_np_x`,e:"Hidup 10 tahun lagi, i = 5%, ₁₀p = 0,9: v¹⁰ × 0,9 ≈ 0,5525."},
+ endow:{n:"Endowment",d:"Dibayar bila meninggal dalam n tahun atau hidup sampai akhir n. Gabungan [[term|term]] dan [[pe|pure endowment]].",f:String.raw`A_{x:\overline{n}|}=A^{1}_{x:\overline{n}|}+A_{x:\overline{n}|}^{\ 1}`,e:"Tanpa angka 1 di atas simbol berarti gabungan keduanya."},
+ tunda:{n:"Asuransi tunda (deferred)",d:"Berlaku setelah m tahun. Peluang hidup ke m tahun dan diskonto m tahun dikalikan dengan asuransi pada usia x+m.",f:String.raw`{}_{m|}A_x=v^m\,{}_mp_x\,A_{x+m}=A_x-A^{1}_{x:\overline{m}|}`,e:"m| di kiri bawah berarti ditunda m tahun."},
+ kontinu:{n:"Santunan dibayar saat meninggal",d:"Tanda bar di atas A berarti santunan dibayar saat kematian terjadi, bukan di akhir tahun. Memakai laju kematian μ.",f:String.raw`\bar A_x=\int_0^\infty v^t\,{}_tp_x\,\mu_{x+t}\,dt`,e:"Di bawah [[udd|UDD]]: Ā ≈ (i/δ) A."},
+ udd:{n:"Asumsi UDD",d:"Uniform distribution of deaths: kematian tersebar merata dalam tiap tahun. Menghubungkan santunan saat meninggal dengan santunan akhir tahun, dengan δ = ln(1+i).",f:String.raw`\bar A_x\approx\frac{i}{\delta}A_x,\qquad A_x^{(m)}\approx\frac{i}{i^{(m)}}A_x`,e:"i = 5%: i/δ = 0,05/0,04879 ≈ 1,0248."},
+ mom2:{n:"Momen kedua dan variansi",d:"Momen kedua dihitung seperti A tetapi v diganti v² (bukan dikuadratkan setelahnya). Dipakai untuk variansi nilai sekarang manfaat.",f:String.raw`{}^2A_x=\sum_{k}v^{2(k+1)}{}_kp_x q_{x+k},\qquad \operatorname{Var}(Z)=\,{}^2A_x-(A_x)^2`,e:"Manfaat b satuan: Var = b² Var(Z)."},
+ joint:{n:"Joint life dan last survivor",d:"Asuransi untuk dua jiwa. Joint life dibayar pada kematian pertama; last survivor dibayar pada kematian terakhir.",f:String.raw`A_{\overline{xy}}=A_x+A_y-A_{xy}`,e:"A_{xy}: kematian pertama; A_{\overline{xy}}: kematian terakhir."},
+ naik:{n:"Manfaat naik atau turun (IA, DA)",d:"Manfaat berubah tiap tahun: naik (k+1 bila meninggal di tahun ke-k+1) atau turun (n, n−1, …, 1).",f:String.raw`(IA)^{1}_{x:\overline{n}|}+(DA)^{1}_{x:\overline{n}|}=(n+1)\,A^{1}_{x:\overline{n}|}`,e:"(IA)ₓ = Σ (k+1) vᵏ⁺¹ ₖpₓ qₓ₊ₖ."},
+ cadangan:{n:"Cadangan (reserve)",d:"Cadangan prospektif = nilai sekarang manfaat mendatang dikurangi nilai sekarang premi mendatang, pada tahun ke-t. Memakai [[premi|premi bersih]].",f:String.raw`{}_tV(A_x)=A_{x+t}-P_x\,\ddot a_{x+t}=1-\frac{\ddot a_{x+t}}{\ddot a_x}`,e:"Endowment: A_{x+t:n−t|} − P_{x:n|} ä_{x+t:n−t|}."},
+ rekursi:{n:"Rumus rekursi dan hubungan anuitas",d:"Menghubungkan asuransi usia x dengan usia x+1, dan asuransi dengan [[hidup|anuitas hidup]].",f:String.raw`A_x=v\,q_x+v\,p_x\,A_{x+1},\qquad A_x=1-d\,\ddot a_x`,e:"Dengan d = iv. Premi bersih seumur hidup: P_x = A_x / ä_x."},
+
+ pvrv:{n:"Peubah acak nilai sekarang (PVRV), Z",d:"Nilai sekarang manfaat asuransi sebagai peubah acak. Bergantung pada sisa hidup tersantun K_x (jumlah tahun penuh yang dijalani sebelum meninggal); manfaat dibayar di waktu K_x+1.",f:String.raw`Z=v^{K_x+1},\qquad K_x=0,1,2,\dots`,e:"Meninggal di tahun ke-3 (K = 2): manfaat dibayar di waktu 3, Z = v³."},
+ kdq:{n:"Peluang kematian tertunda (k|q_x)",d:"Peluang hidup k tahun lalu meninggal di tahun berikutnya. Sama dengan P(K_x = k). Dipakai di hampir semua rumus [[asuransi|asuransi]] diskrit.",f:String.raw`{}_{k|}q_x={}_kp_x\,q_{x+k}=\frac{d_{x+k}}{\ell_x}`,e:"k = 1: hidup 1 tahun (₁p), lalu meninggal di tahun kedua (q_{x+1})."},
+ mthly:{n:"Asuransi dibayar 1/m tahunan",d:"Santunan dibayar di akhir 1/m tahun kematian. Untuk m → ∞ mendekati [[kontinu|pembayaran saat meninggal]].",f:String.raw`A_x^{(m)}=\sum_{k=0}^{\infty}v^{\frac{k+1}{m}}\;{}_{\frac km|\frac1m}q_x,\quad A^{(m)1}_{x:\overline n|}=\sum_{k=0}^{mn-1}v^{\frac{k+1}{m}}\,{}_{\frac km|\frac1m}q_x`,e:"Endowment: A^{(m)}_{x:n|} = A^{(m)1}_{x:n|} + nEₓ."},
+ claims:{n:"Pendekatan percepatan klaim",d:"Mengaproksimasi santunan 1/m tahunan atau saat meninggal dengan santunan akhir tahun yang dimajukan; alternatif dari [[udd|UDD]].",f:String.raw`A_x^{(m)}\approx(1+i)^{\frac{m-1}{2m}}A_x,\quad \bar A_x\approx(1+i)^{1/2}A_x,\quad \bar A_{x:\overline n|}\approx(1+i)^{1/2}A^{1}_{x:\overline n|}+v^n{}_np_x`,e:"Dengan UDD: Ā_{x:n|} ≈ (i/δ)A¹ + vⁿ ₙpₓ."},
+ acm:{n:"Anuitas pasti dibayar m kali setahun",d:"Pembayaran 1/m per periode 1/m tahun, di awal atau di akhir; kontinu bila m → ∞. Bahan dasar [[hidup|anuitas hidup]].",f:String.raw`\ddot a_{\overline n|}=\tfrac{1-v^n}{d},\ a_{\overline n|}=\tfrac{1-v^n}{i},\ \ddot a^{(m)}_{\overline n|}=\tfrac{1-v^n}{d^{(m)}},\ a^{(m)}_{\overline n|}=\tfrac{1-v^n}{i^{(m)}},\ \bar a_{\overline n|}=\tfrac{1-v^n}{\delta}`,e:"ä dibayar di awal, a di akhir periode."},
+ aterm:{n:"Anuitas hidup berjangka",d:"Anuitas awal 1 per tahun selama masih hidup, maksimum n tahun. Dihubungkan dengan [[endow|endowment]] lewat relasi asuransi–anuitas.",f:String.raw`\ddot a_{x:\overline n|}=\sum_{k=0}^{n-1}v^k\,{}_kp_x=\frac{1-A_{x:\overline n|}}{d}=\ddot a_x-{}_nE_x\,\ddot a_{x+n}`,e:"Var(Y) = (²A_{x:n|} − A_{x:n|}²)/d²."},
+ adefer:{n:"Anuitas hidup tunda",d:"Mulai membayar 1 pada waktu m, selama yang bersangkutan masih hidup; tidak ada pembayaran bila meninggal sebelum m.",f:String.raw`{}_{m|}\ddot a_x=\sum_{k=m}^{\infty}v^k\,{}_kp_x=\ddot a_x-\ddot a_{x:\overline m|}`,e:"Sama dengan mE_x · ä_{x+m}."},
+ premi:{n:"Premi bersih",d:"Premi yang cukup untuk menutup manfaat yang diharapkan, tanpa biaya dan keuntungan. Dihitung dengan membagi nilai sekarang manfaat dengan [[hidup|anuitas hidup]].",f:String.raw`P_x=\frac{A_x}{\ddot a_x},\quad A_x=\sum_{k=0}^{\infty} v^{k+1}\,{}_kp_x\,q_{x+k}`,e:"A_x adalah nilai sekarang aktuaria dari santunan Rp1 pada asuransi jiwa seumur hidup."},
+ amort:{n:'Amortisasi pinjaman',d:'Melunasi pinjaman dengan pembayaran berkala; tiap pembayaran memuat bunga dan pokok. Besar pembayaran = pokok dibagi [[pasti|anuitas pasti]].',f:String.raw`R=\frac{L}{a_{\overline{n}|}}`,e:'Pinjaman Rp1.000.000, 3 tahun, i = 10%: R = 1.000.000/2,4869 ≈ Rp402.115.'},
+ saldo:{n:'Saldo pinjaman',d:'Sisa pokok setelah pembayaran ke-t. Prospektif: [[pv|nilai sekarang]] pembayaran yang tersisa. Retrospektif: pokok yang berbunga dikurangi akumulasi pembayaran. Hasilnya sama.',f:String.raw`B_t=R\,a_{\overline{n-t}|}=L(1+i)^t-R\,s_{\overline{t}|}`,e:'B₁ = 402.115 × a₂ = 402.115 × 1,7355 ≈ Rp697.885.'},
+ bgpokok:{n:'Bunga dan pokok per pembayaran',d:'Bunga = i × saldo sebelumnya; sisa pembayaran mengurangi pokok. Bunga turun, pokok naik dengan rasio 1+i.',f:String.raw`I_t=iB_{t-1}=R(1-v^{n-t+1}),\quad P_t=Rv^{n-t+1}`,e:'t = 1: I₁ = 10% × 1.000.000 = 100.000; P₁ = 402.115 − 100.000 = 302.115.'},
+ sf:{n:'Sinking fund',d:'Peminjam membayar bunga iL tiap periode ke pemberi pinjaman dan menyetor D ke dana terpisah berbunga j, supaya dana = L di akhir. Sama dengan [[amort|amortisasi]] hanya bila j = i.',f:String.raw`D=\frac{L}{s_{\overline{n}|j}},\qquad \text{total}=iL+D`,e:'L = 1.000.000, n = 3, i = 10%, j = 8%: D = 1.000.000/3,2464 ≈ 308.034; total ≈ 408.034.'},
+ sfsaldo:{n:'Saldo sinking fund dan pinjaman neto',d:'Dana tumbuh dari setoran dan bunga j. Pinjaman neto = pokok dikurangi dana; bunga neto = bunga dibayar dikurangi bunga yang diperoleh dana.',f:String.raw`SF_t=D\,s_{\overline{t}|j},\quad B_t^{net}=L-SF_t,\quad I_t^{net}=iL-jSF_{t-1}`,e:'Akhir tahun 1: SF₁ = 308.034; pinjaman neto = 691.966.'},
+ obl:{n:'Obligasi',d:'Surat utang: penerbit membayar [[kupon|kupon]] berkala dan [[tebus|nilai tebus]] di jatuh tempo. Harga = [[pv|nilai sekarang]] semua pembayaran pada imbal hasil i.',f:String.raw`P=Fr\,a_{\overline{n}|}+C\,v^n`,e:'F = C = 1.000, r = 6%, n = 3, i = 5%: P ≈ 1.027,23.'},
+ kupon:{n:'Kupon',d:'Pembayaran bunga berkala obligasi: laju kupon r dikali nominal F. Berbeda dari i (imbal hasil investor).',f:String.raw`\text{kupon}=Fr`,e:'F = 1.000, r = 6% per tahun: kupon 60 per tahun.'},
+ tebus:{n:'Nominal (F) dan nilai tebus (C)',d:'F dasar menghitung kupon; C dibayar di jatuh tempo. Jika C = F obligasi dibeli/ditebus pada par. Laju kupon termodifikasi g membandingkan kupon dengan C.',f:String.raw`g=\frac{Fr}{C}`,e:'F = 1.000 ditebus 1.050: C = 1.050.'},
+ agio:{n:'Premi obligasi',d:'Harga di atas nilai tebus (P > C), terjadi bila g > i. Premi diamortisasi ke nol selama masa obligasi.',f:String.raw`P-C=(Fr-Ci)\,a_{\overline{n}|}`,e:'Contoh obligasi: premi = 1.027,23 − 1.000 = 27,23.'},
+ disc:{n:'Diskon obligasi',d:'Harga di bawah nilai tebus (P < C), terjadi bila g < i. Diskon diakumulasi sampai nilai buku = C.',f:String.raw`C-P=(Ci-Fr)\,a_{\overline{n}|}`,e:'Obligasi yang sama dengan i = 7%: P ≈ 973,76, diskon ≈ 26,24.'},
+ bookv:{n:'Nilai buku',d:'Harga yang disesuaikan tiap periode. Bunga = i × nilai buku sebelumnya; selisih terhadap kupon adalah amortisasi [[agio|premi]] (atau akumulasi [[disc|diskon]]).',f:String.raw`BV_t=Fr\,a_{\overline{n-t}|}+Cv^{n-t}=BV_{t-1}(1+i)-Fr`,e:'BV₁ = 1.027,23 × 1,05 − 60 ≈ 1.018,59.'},
+ makeham:{n:'Rumus Makeham',d:'Jalan pintas harga obligasi: K = [[pv|nilai sekarang]] nilai tebus.',f:String.raw`P=K+\frac{g}{i}(C-K),\quad K=Cv^n`,e:'K = 863,84; P = 863,84 + (0,06/0,05)(136,16) ≈ 1.027,23.'},
+ spot:{n:'Suku bunga spot',d:'Imbal hasil obligasi kupon nol berjangka t. Dipakai mendiskontokan satu arus kas di waktu t.',f:String.raw`P_0=\frac{C}{(1+s_t)^t}`,e:'s₂ = 5%: Rp100 dua tahun lagi bernilai 100/1,05² ≈ 90,70.'},
+ fwd:{n:'Suku bunga forward',d:'Suku bunga untuk periode mendatang yang tersirat dari [[spot|suku bunga spot]].',f:String.raw`(1+s_n)^n=(1+s_{n-1})^{n-1}(1+f_{n-1,n})`,e:'s₁ = 4%, s₂ = 5%: f = 1,05²/1,04 − 1 ≈ 6,01%.'},
+ ytm:{n:'Imbal hasil (yield to maturity)',d:'Satu tingkat i yang membuat harga sama dengan nilai sekarang semua arus kas. Dicari lewat interpolasi atau Newton. Untuk obligasi yang dapat dipanggil, pakai imbal hasil terendah.',f:String.raw`P=\sum_{k=1}^{n}\frac{Fr}{(1+i)^k}+\frac{C}{(1+i)^n}`,e:'P = 1.027,23 dengan kupon 60 dan C = 1.000, n = 3 memberi i = 5%.'},
+ kurva:{n:'Kurva imbal hasil',d:'Grafik [[spot|suku bunga spot]] terhadap jangka waktu, disusun bertahap (bootstrapping) dari harga obligasi.',f:String.raw`1+s_n=\left(\frac{Fr+C}{P-Fr\sum_{k=1}^{n-1}(1+s_k)^{-k}}\right)^{1/n}`,e:'Nominal 100, kupon 6, P = 101,9143, s₁ = 4% ⇒ s₂ = 5%.'}
+};
+const link = s => s.replace(/\[\[(\w+)\|([^\]]+)\]\]/g,'<span class="term" data-t="$1">$2</span>');
+
+const cards = []; let timer = null, openT = null;
+function closeFrom(l){ while(cards.length>l){ cards.pop().el.remove(); } }
+function openCard(id, anchor, level){
+  if(cards[level] && cards[level].id===id){ closeFrom(level+1); return; }
+  closeFrom(level);
+  const t = T[id]; if(!t) return;
+  const el = document.createElement('div'); el.className='card';
+  el.innerHTML = `<h3>${t.n}</h3><p>${link(t.d)}</p><div class="lbl">Rumus</div><div class="f">\\[${t.f}\\]</div>`+(t.e?`<div class="lbl">Contoh</div><div class="ex">${t.e}</div>`:'');
+  document.body.appendChild(el);
+  const r = anchor.getClientRects()[0] || anchor.getBoundingClientRect();
+  const w = el.offsetWidth, h = el.offsetHeight;
+  let x = Math.min(Math.max(8, r.left), innerWidth-w-8);
+  let y = r.bottom + 6; if(y+h > innerHeight-8) y = Math.max(8, r.top-h-6);
+  el.style.left = x+'px'; el.style.top = y+'px';
+  const rec = {id, el, level}; cards[level] = rec;
+  el.addEventListener('mouseenter', ()=>{ clearTimeout(timer); closeFrom(level+1); });
+  el.addEventListener('mouseleave', schedule);
+  if(window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([el]).then(()=>{
+    const hh = el.offsetHeight; if(y+hh > innerHeight-8 && r.top-hh-6 > 8) el.style.top=(r.top-hh-6)+'px';
+  });
+}
+function schedule(){ clearTimeout(timer); timer = setTimeout(()=>closeFrom(0), 300); }
+document.addEventListener('mouseover', e=>{
+  const term = e.target.closest('.term'); if(!term) return;
+  clearTimeout(timer); clearTimeout(openT);
+  const host = term.closest('.card');
+  const level = host ? cards.findIndex(c=>c.el===host)+1 : 0;
+  openT = setTimeout(()=>openCard(term.dataset.t, term, level), 150);
+});
+document.addEventListener('mouseout', e=>{
+  if(e.target.closest && e.target.closest('.term')){ clearTimeout(openT); schedule(); }
+});
+
+const C = {
+ matkeu:{t:"Matematika Keuangan",ch:[
+  {id:"matkeu-1",t:"Bunga dan anuitas",h:String.raw`<h2>Nilai uang terhadap waktu</h2>
+<p>Satu rupiah hari ini lebih berharga daripada satu rupiah tahun depan karena uang bisa berbunga. Ada [[sederhana|bunga sederhana]] dan [[majemuk|bunga majemuk]]; ukuran per periodenya adalah [[bunga|suku bunga efektif]]. Pembayaran masa depan diubah menjadi [[pv|nilai sekarang]] memakai [[v|faktor diskonto]].</p>
+<h2>Anuitas</h2>
+<p>[[anuitas|Anuitas]] adalah rangkaian pembayaran berkala. Pembayaran di akhir periode disebut [[pasti|anuitas pasti]], di awal periode disebut [[awal|anuitas awal]], dan yang tak berujung disebut [[perpet|perpetuitas]].</p>`},
+  {id:"matkeu-2",t:"Amortisasi pinjaman (Pekan 9–10)",h:String.raw`<h2>Pembayaran dan saldo</h2>
+<p>Pinjaman \(L\) dilunasi dengan \(n\) pembayaran sama \(R\) di akhir periode. Lewat [[amort|amortisasi]], \(L=R\,a_{\overline{n}|}\) sehingga \(R=L/a_{\overline{n}|}\). [[saldo|Saldo pinjaman]] setelah pembayaran ke-\(t\):</p>
+\[B_t^{p}=R\,a_{\overline{n-t}|}\quad(\text{prospektif}),\qquad B_t^{r}=L(1+i)^t-R\,s_{\overline{t}|}\quad(\text{retrospektif})\]
+<h2>Bunga dan pokok</h2>
+<p>Tiap pembayaran dipecah oleh [[bgpokok|bunga dan pokok]]:</p>
+\[I_t=iB_{t-1}=R(1-v^{n-t+1}),\qquad P_t=R\,v^{n-t+1},\qquad \sum P_t=L\]
+<h2>Contoh jadwal</h2>
+<p>\(L=1.000.000\), \(n=3\), \(i=10\%\), sehingga \(R\approx 402.115\).</p>
+<table><tr><th>t</th><th>Bayar</th><th>Bunga</th><th>Pokok</th><th>Saldo</th></tr>
+<tr><td>0</td><td></td><td></td><td></td><td>1.000.000</td></tr>
+<tr><td>1</td><td>402.115</td><td>100.000</td><td>302.115</td><td>697.885</td></tr>
+<tr><td>2</td><td>402.115</td><td>69.789</td><td>332.326</td><td>365.559</td></tr>
+<tr><td>3</td><td>402.115</td><td>36.556</td><td>365.559</td><td>0</td></tr></table>
+<h2>Mencari jangka waktu, suku bunga, dan periode</h2>
+<p><b>Jangka waktu:</b> dari \(L=R\,a_{\overline{n}|}\) diperoleh \(n=-\dfrac{\ln(1-iL/R)}{\ln(1+i)}\). Jika \(n\) tidak bulat, ada pembayaran terakhir yang lebih kecil (<i>drop payment</i>) atau lebih besar (<i>balloon</i>) satu periode setelah pembayaran penuh terakhir.</p>
+<p><b>Suku bunga:</b> selesaikan \(a_{\overline{n}|i}=L/R\) dengan interpolasi linier atau Newton–Raphson.</p>
+<p><b>Periode pembayaran:</b> bila dibayar \(m\) kali setahun, pakai \(i^{(m)}/m\) per periode dan \(n\to mn\). Pokok pinjaman dapat dicari dari \(L=R\,a_{\overline{n}|}\) bila \(R,n,i\) diketahui, dan sisa pinjaman dari rumus [[saldo|saldo]] di atas.</p>`},
+  {id:"matkeu-3",t:"Sinking fund (Pekan 11–12)",h:String.raw`<h2>Gagasan</h2>
+<p>Pada metode [[sf|sinking fund]], pokok \(L\) tidak dicicil. Peminjam membayar bunga \(iL\) tiap periode kepada pemberi pinjaman dan menyetor \(D\) ke dana yang berbunga \(j\), sehingga dana di akhir sama dengan \(L\):</p>
+\[D\,s_{\overline{n}|j}=L\ \Rightarrow\ D=\frac{L}{s_{\overline{n}|j}},\qquad \text{total per periode}=iL+\frac{L}{s_{\overline{n}|j}}\]
+<p>Jika \(j=i\), total sama dengan \(L/a_{\overline{n}|i}\), yaitu hasil amortisasi. Jika \(j<i\), total lebih besar.</p>
+<h2>Saldo dan bunga neto</h2>
+<p>Dana: \(SF_t=D\,s_{\overline{t}|j}\). [[sfsaldo|Pinjaman neto]] \(B_t=L-SF_t\) dan bunga neto \(iL-jSF_{t-1}\).</p>
+<h2>Contoh</h2>
+<p>\(L=1.000.000\), \(n=3\), \(i=10\%\), \(j=8\%\): \(s_{\overline{3}|8\%}=3{,}2464\), \(D\approx 308.034\), total \(\approx 408.034\) (bandingkan 402.115 pada amortisasi).</p>
+<table><tr><th>t</th><th>Setoran</th><th>Bunga dana</th><th>Dana</th><th>Pinjaman neto</th></tr>
+<tr><td>1</td><td>308.034</td><td>0</td><td>308.034</td><td>691.966</td></tr>
+<tr><td>2</td><td>308.034</td><td>24.643</td><td>640.711</td><td>359.289</td></tr>
+<tr><td>3</td><td>308.034</td><td>51.257</td><td>1.000.002</td><td>≈ 0</td></tr></table>
+<h2>Mencari besaran yang tidak diketahui</h2>
+<p><b>Suku bunga efektif peminjam</b> \(i'\): selesaikan \(L\,a_{\overline{n}|i'}=iL+D\), yaitu pembayaran total yang diperlakukan sebagai anuitas. Selalu \(i'>i\) bila \(j<i\).</p>
+<p><b>Jangka waktu:</b> dari \(D\,s_{\overline{n}|j}=L\) diperoleh \(n=\dfrac{\ln(1+jL/D)}{\ln(1+j)}\). <b>Besar pembayaran</b> dan <b>pokok</b> dari rumus \(D\) di atas. Bila periode pembayaran berbeda dengan periode bunga dana, ubah ke suku bunga per periode pembayaran lebih dulu.</p>`},
+  {id:"matkeu-4",t:"Harga dan nilai buku obligasi (Pekan 13–14)",h:String.raw`<h2>Harga obligasi</h2>
+<p>[[obl|Obligasi]] bernominal \(F\) membayar [[kupon|kupon]] \(Fr\) tiap periode dan [[tebus|nilai tebus]] \(C\) di akhir periode ke-\(n\). Pada imbal hasil \(i\):</p>
+\[P=Fr\,a_{\overline{n}|}+C\,v^n=C+(Fr-Ci)\,a_{\overline{n}|}\]
+<p>Bila \(g=Fr/C>i\) harga memiliki [[agio|premi]] (\(P>C\)); bila \(g<i\) ada [[disc|diskon]] (\(P<C\)). Cara cepat: [[makeham|rumus Makeham]] \(P=K+\frac gi(C-K)\), \(K=Cv^n\).</p>
+<h2>Nilai buku dan amortisasi</h2>
+<p>[[bookv|Nilai buku]] \(BV_t=Fr\,a_{\overline{n-t}|}+Cv^{n-t}\). Periode ke-\(t\): bunga \(=i\,BV_{t-1}\), dan</p>
+\[\text{amortisasi premi}=Fr-iBV_{t-1}=(Fr-Ci)\,v^{n-t+1}\]
+<p>Untuk diskon, selisihnya negatif: \(iBV_{t-1}-Fr=(Ci-Fr)v^{n-t+1}\) disebut akumulasi diskon dan nilai buku naik menuju \(C\).</p>
+<h2>Contoh</h2>
+<p>\(F=C=1.000\), \(r=6\%\), \(n=3\), \(i=5\%\): \(P=863{,}84+163{,}39=1.027{,}23\).</p>
+<table><tr><th>t</th><th>Kupon</th><th>Bunga</th><th>Amortisasi premi</th><th>Nilai buku</th></tr>
+<tr><td>0</td><td></td><td></td><td></td><td>1.027,23</td></tr>
+<tr><td>1</td><td>60</td><td>51,36</td><td>8,64</td><td>1.018,59</td></tr>
+<tr><td>2</td><td>60</td><td>50,93</td><td>9,07</td><td>1.009,52</td></tr>
+<tr><td>3</td><td>60</td><td>50,48</td><td>9,52</td><td>1.000,00</td></tr></table>
+<p>Dengan \(i=7\%\) obligasi yang sama berharga \(\approx 973{,}76\) (diskon 26,24). Nilai tebus dan nominal dapat dicari dari rumus harga bila \(P,r,n,i\) diketahui.</p>`},
+  {id:"matkeu-5",t:"Kupon, jangka waktu, dan kurva imbal hasil (Pekan 15)",h:String.raw`<h2>Mencari kupon dan jangka waktu</h2>
+<p>Dari harga \(P\) yang diketahui:</p>
+\[Fr=\frac{P-Cv^n}{a_{\overline{n}|}},\qquad v^n=1-i\,\frac{P-C}{Fr-Ci}\ \Rightarrow\ n=-\frac{\ln v^n}{\ln(1+i)}\]
+<p>Imbal hasil \(i\) ([[ytm|yield to maturity]]) dari harga dicari dengan interpolasi atau Newton. Untuk obligasi yang dapat dipanggil sebelum jatuh tempo, hitung harga pada setiap tanggal panggil dan ambil yang terendah bila ada premi, atau tanggal jatuh tempo bila ada diskon.</p>
+<h2>Suku bunga spot dan forward</h2>
+<p>[[spot|Suku bunga spot]] \(s_t\) mendiskontokan arus kas pada waktu \(t\), sehingga \(P=\sum_t CF_t(1+s_t)^{-t}\). [[fwd|Suku bunga forward]]:</p>
+\[(1+s_n)^n=(1+s_{n-1})^{n-1}(1+f_{n-1,n})\]
+<p>Contoh: \(s_1=4\%\), \(s_2=5\%\) memberi \(f_{1,2}=1{,}05^2/1{,}04-1\approx 6{,}01\%\).</p>
+<h2>Membuat kurva imbal hasil</h2>
+<p>[[kurva|Kurva imbal hasil]] dibuat dengan <i>bootstrapping</i>: mulai dari obligasi satu tahun untuk \(s_1\), lalu tiap obligasi berikutnya memberi satu \(s_n\) baru.</p>
+\[1+s_n=\left(\frac{Fr+C}{P-Fr\sum_{k=1}^{n-1}(1+s_k)^{-k}}\right)^{1/n}\]
+<p>Contoh: obligasi 2 tahun, \(F=C=100\), \(r=6\%\), \(P=101{,}9143\), \(s_1=4\%\). Nilai sekarang kupon pertama \(=6/1{,}04=5{,}7692\), sisa \(=96{,}1451\), maka \(1+s_2=(106/96{,}1451)^{1/2}=1{,}05\) dan \(s_2=5\%\). Titik \((1;4\%)\), \((2;5\%)\) membentuk kurva yang menaik.</p>`}]},
+ statmat:{t:"Statistika Matematika",ch:[
+  {id:"statmat-1",t:"Penaksiran titik dan MLE",h:String.raw`<h2>Penaksiran titik</h2>
+<p>Misalkan \(X_1,\dots,X_n\) sampel acak yang fungsi kepadatannya bergantung pada parameter \(\theta\in\Omega\) yang tidak diketahui. Menaksir \(\theta\) dengan sebuah [[statistik|statistik]] disebut penaksiran titik. Penaksir yang baik, antara lain, [[takbias|takbias]]. Sebagai pembuka, [[mom|metode momen]] menaksir lewat momen sampel.</p>
+<h2>Penaksir kemungkinan maksimum</h2>
+<p>[[mle|MLE]] memilih \(\hat\theta\) yang memaksimumkan [[likelihood|fungsi likelihood]]. Biasanya lebih mudah memaksimumkan log-likelihood \(\ell(\theta)=\ln L(\theta)\) lewat \(\partial\ell/\partial\theta=0\).</p>
+<h2>Contoh 1: Bernoulli</h2>
+<p>Untuk \(f(x)=\theta^x(1-\theta)^{1-x}\), \(x=0,1\):</p>
+\[L=\theta^{\sum x_i}(1-\theta)^{n-\sum x_i},\qquad \ell=\textstyle\sum x_i\ln\theta+(n-\sum x_i)\ln(1-\theta)\]
+\[\frac{\partial\ell}{\partial\theta}=\frac{\sum x_i}{\theta}-\frac{n-\sum x_i}{1-\theta}=0\ \Rightarrow\ \hat\theta=\bar X\]
+<h2>Contoh 2: Normal \(N(\theta,1)\)</h2>
+\[\ell=-\tfrac n2\ln 2\pi-\tfrac12\textstyle\sum (x_i-\theta)^2,\qquad \frac{\partial\ell}{\partial\theta}=\sum(x_i-\theta)=0\ \Rightarrow\ \hat\theta=\bar X\]`},
+  {id:"statmat-2",t:"Statistik cukup",h:String.raw`<h2>Gagasan</h2>
+<p>[[suff|Statistik cukup]] merangkum seluruh informasi sampel tentang \(\theta\). Untuk Bernoulli, \(Y=\sum X_i\sim\text{Bin}(n,\theta)\) dan peluang sampel bersyaratnya:</p>
+\[P(X_1=x_1,\dots,X_n=x_n\mid Y=y)=\frac{\theta^{y}(1-\theta)^{n-y}}{\binom ny\theta^{y}(1-\theta)^{n-y}}=\frac1{\binom ny}\]
+<p>Hasilnya bebas dari \(\theta\), jadi \(Y\) cukup.</p>
+<h2>Lewat definisi: Gamma(2, θ)</h2>
+<p>Dengan [[mgf|m.g.f.]], \(M_Y(t)=(1-\theta t)^{-2n}\), sehingga \(Y=\sum X_i\sim\text{Gamma}(2n,\theta)\). Rasio kepadatan bersama terhadap kepadatan \(Y\) adalah \(\dfrac{\Gamma(2n)}{\Gamma(2)^n}\dfrac{x_1\cdots x_n}{(x_1+\cdots+x_n)^{2n-1}}\), bebas dari \(\theta\).</p>
+<h2>Lewat faktorisasi</h2>
+<p>[[neyman|Teorema Neyman]] lebih praktis. Untuk \(f(x)=\theta x^{\theta-1}\), \(0<x<1\):</p>
+\[\prod f(x_i)=\underbrace{\theta^n\Big(\prod x_i\Big)^{\theta}}_{k_1}\cdot\underbrace{\frac1{\prod x_i}}_{k_2}\ \Rightarrow\ \prod X_i\text{ cukup untuk }\theta\]
+<h2>Latihan: Poisson</h2>
+<p>\(Y=\sum X_i\sim\text{Poisson}(n\theta)\) (lewat m.g.f. \(e^{n\theta(e^t-1)}\)). Rasionya:</p>
+\[\frac{\prod \theta^{x_i}e^{-\theta}/x_i!}{(n\theta)^ye^{-n\theta}/y!}=\frac{y!}{n^y\,x_1!\cdots x_n!}\]
+<p>Bebas dari \(\theta\), jadi \(\sum X_i\) cukup. Lewat Neyman: \(\theta^{\sum x}e^{-n\theta}\cdot\dfrac1{\prod x_i!}\).</p>`},
+  {id:"statmat-3",t:"Estimasi Bayesian",h:String.raw`<h2>Klasik vs Bayesian</h2>
+<p>Pada MOM dan MLE, \(\theta\) adalah konstanta tak diketahui. Pada pendekatan Bayesian, \(\theta\) adalah peubah acak \(\Theta\) dengan [[prior|prior]] \(h(\theta)\). Setelah data \(x\) diamati, keyakinan diperbarui menjadi [[posterior|posterior]]:</p>
+\[k(\theta\mid x)\propto L(x\mid\theta)\,h(\theta)\]
+<h2>Fungsi kerugian dan penaksir Bayes</h2>
+<p>Dengan [[loss|fungsi kerugian]], [[bayes|penaksir Bayes]] meminimumkan risiko posterior. Kerugian kuadratik \((\theta-\delta)^2\) memberi \(\delta^*=E(\theta\mid x)\), karena \(\partial/\partial\delta\,E[(\theta-\delta)^2]=-2E[\theta-\delta]=0\). Kerugian mutlak \(|\theta-\delta|\) memberi median posterior.</p>
+<h2>Contoh: Binomial–Beta</h2>
+<p>Dengan [[konjugat|prior konjugat]] Beta, posteriornya \(\text{Beta}(x+\alpha,\,n-x+\beta)\), sehingga:</p>
+\[\delta^*(x)=\frac{x+\alpha}{n+\alpha+\beta}\]
+<p>Ini rata-rata terbobot MLE dan rata-rata prior ([[shrink|shrinkage]]). Untuk \(n=10\), \(x=7\), prior Beta(2,2): \(\delta^*=9/14\approx0{,}643\), sedangkan MLE \(=0{,}7\).</p>
+<h2>Catatan</h2>
+<p>Bayesian fleksibel saat sampel kecil, tetapi hasilnya bergantung pada pilihan prior yang bersifat subjektif.</p>`}]},
+ pma:{t:"Pengantar Matematika Aktuaria",ch:[
+  {id:"pma-1",t:"Model kematian dan peluang",h:String.raw`<h2>Model kematian</h2>
+<p>Semua perhitungan berawal dari [[mort|tabel mortalitas]], yang memberi [[tpx|peluang hidup]] dan [[qx|peluang meninggal]]. Peluang meninggal tertunda adalah [[kdq|k|q_x]].</p>`},
+  {id:"pma-2",t:"Asuransi jiwa: annual case (Pert. 9)",h:String.raw`<p>Santunan dibayar di akhir tahun kematian. [[pvrv|Z]] adalah nilai sekarang manfaat; kematian di tahun ke-\(k+1\) berarti \(K_x=k\) dan dibayar di waktu \(k+1\).</p>
+<h2>Berjangka ([[term|term]])</h2>
+\[Z=\begin{cases}v^{K_x+1},&K_x=0,\dots,n-1\\0,&K_x\ge n\end{cases}\qquad A^1_{x:\overline n|}=\sum_{k=0}^{n-1}v^{k+1}\,{}_{k|}q_x\]
+<h2>Seumur hidup</h2>
+\[Z=v^{K_x+1},\qquad A_x=\sum_{k=0}^{\infty}v^{k+1}\,{}_{k|}q_x\]
+<p>Bila ada usia batas \(\omega\), ganti \(\infty\) dengan \(\omega-x-1\), karena \({}_tp_x=0\) untuk \(t\ge\omega-x\). Lihat [[asuransi|asuransi seumur hidup]].</p>
+<h2>[[pe|Pure endowment]]</h2>
+\[Z=\begin{cases}0,&T_x<n\\v^n,&T_x\ge n\end{cases}\qquad {}_nE_x=A_{x:\overline n|}^{\ 1}=v^n\,{}_np_x\]
+<h2>[[endow|Endowment]]</h2>
+\[Z=v^{\min(K_x+1,\,n)},\qquad A_{x:\overline n|}=A^1_{x:\overline n|}+{}_nE_x\]
+<h2>[[tunda|Seumur hidup tunda]]</h2>
+\[{}_{n|}A_x=\sum_{k=n}^{\infty}v^{k+1}\,{}_{k|}q_x=v^n\,{}_np_x\,A_{x+n}\]`},
+  {id:"pma-3",t:"Momen, 1/m tahunan, UDD, percepatan klaim (Pert. 10)",h:String.raw`<h2>Momen kedua dan variansi</h2>
+<p>[[mom2|Momen kedua]] dihitung seperti rata-rata tetapi dengan \(v^2\) di dalam jumlahan. Setara dengan mengganti \(\delta\) menjadi \(2\delta\), atau \(i\) menjadi \((1+i)^2-1\).</p>
+\[{}^2A^1_{x:\overline n|}=\sum_{k=0}^{n-1}v^{2(k+1)}{}_{k|}q_x,\quad {}_n^2E_x=v^{2n}{}_np_x,\quad {}^2A_{x:\overline n|}={}^2A^1_{x:\overline n|}+v^{2n}{}_np_x\]
+\[\operatorname{Var}(Z)={}^2A-(A)^2\]
+<h2>Dibayar 1/m tahunan</h2>
+<p>[[mthly|Santunan 1/m tahunan]] dengan \(v^{(k+1)/m}\) dan peluang tertunda \({}_{k/m|1/m}q_x\).</p>
+<h2>Menghubungkan Ā, A, dan A(m)</h2>
+<p>Dengan [[udd|UDD]]: \(\bar A_x\approx\frac i\delta A_x\) dan \(\bar A_{x:\overline n|}\approx\frac i\delta A^1_{x:\overline n|}+v^n{}_np_x\). Dengan [[claims|percepatan klaim]]: \(A^{(m)}_x\approx(1+i)^{\frac{m-1}{2m}}A_x\), \(\bar A_x\approx(1+i)^{1/2}A_x\).</p>
+<h2>Contoh soal</h2>
+<p><b>Term 2 tahun, manfaat 10, usia 40.</b> \(q_{40}=0{,}1\), \(q_{41}=0{,}2\), \(i=5\%\). \(Z=10v\) dengan peluang 0,1; \(Z=10v^2\) dengan peluang 0,9·0,2 = 0,18; selain itu 0.</p>
+\[E[Z]=10(0{,}1v+0{,}18v^2)\approx2{,}585,\quad E[Z^2]=100(0{,}1v^2+0{,}18v^4)\approx23{,}879\]
+\[\operatorname{Var}(Z)\approx23{,}879-2{,}585^2\approx17{,}20\]
+<p><b>\(\ell_x=\sqrt{144-x}\), \(i=6\%\), hitung \(1000A^1_{50:\overline3|}\).</b> Dengan \(d_x=\ell_x-\ell_{x+1}\):</p>
+\[1000\sum_{k=0}^{2}v^{k+1}\frac{d_{50+k}}{\ell_{50}}\approx14{,}3\ \ (\text{pilihan B})\]`},
+  {id:"pma-4",t:"Anuitas hidup (Pert. 11)",h:String.raw`<h2>Review: anuitas pasti</h2>
+<p>[[acm|Anuitas pasti]] 1 per tahun selama n tahun, di awal atau di akhir periode, tahunan, m kali setahun, atau kontinu:</p>
+\[\ddot a_{\overline n|}=\tfrac{1-v^n}{d},\quad a_{\overline n|}=\tfrac{1-v^n}{i},\quad \ddot a^{(m)}_{\overline n|}=\tfrac{1-v^n}{d^{(m)}},\quad a^{(m)}_{\overline n|}=\tfrac{1-v^n}{i^{(m)}},\quad \bar a_{\overline n|}=\tfrac{1-v^n}{\delta}\]
+<h2>Anuitas hidup seumur hidup</h2>
+<p>[[hidup|Anuitas hidup]] awal: \(Y=\ddot a_{\overline{K_x+1}|}=\dfrac{1-v^{K_x+1}}{d}\), dengan \(E[Y]=\ddot a_x\). Dua pendekatan:</p>
+\[\text{agregat: }\ddot a_x=\sum_{k=0}^{\infty}\ddot a_{\overline{k+1}|}\,{}_{k|}q_x\qquad \text{pembayaran berjalan: }\ddot a_x=\sum_{k=0}^{\infty}v^k\,{}_kp_x\]
+\[\operatorname{Var}(Y)=\frac{{}^2A_x-A_x^2}{d^2}\]
+<h2>Anuitas berjangka dan tunda</h2>
+<p>[[aterm|Anuitas berjangka]]: \(Y=\ddot a_{\overline{\min(K_x+1,n)}|}\), dengan variansi \(\frac1{d^2}({}^2A_{x:\overline n|}-A_{x:\overline n|}^2)\). [[adefer|Anuitas tunda]] mulai membayar pada waktu m.</p>
+<h2>Contoh soal</h2>
+<p><b>\(\ddot a_{60:\overline3|}\)</b> dengan \(q_{60}=0{,}11\), \(q_{61}=0{,}13\), \(i=4\%\):</p>
+\[\ddot a_{60:\overline3|}=1+\frac{0{,}89}{1{,}04}+\frac{0{,}89\cdot0{,}87}{1{,}04^2}\approx2{,}5717\]
+<p><b>Diketahui \({}_{20}E_x=0{,}35\), \({}_{20}q_x=0{,}3\), \(A^1_{x:\overline{20}|}=0{,}2\); cari \(\ddot a_{x:\overline{20}|}\).</b> Karena \({}_{20}p_x=0{,}7\), \(v^{20}=0{,}35/0{,}7=0{,}5\), jadi \(d=1-0{,}5^{1/20}\approx0{,}03406\). \(A_{x:\overline{20}|}=0{,}2+0{,}35=0{,}55\), sehingga:</p>
+\[\ddot a_{x:\overline{20}|}=\frac{1-0{,}55}{d}\approx13{,}21\]`},
+  {id:"pma-5",t:"Cheatsheet: notasi asuransi jiwa",h:String.raw`<p>Manfaat 1 satuan, dibayar di akhir tahun kematian kecuali ada tanda bar. \(x\) umur peserta, \(n\) jangka waktu, \(m\) masa tunda, \(v=1/(1+i)\), \(d=iv\), \(\delta=\ln(1+i)\).</p>
+<h2>Cara cepat menghafal simbol</h2>
+<ul><li>Bar di atas A: bayar saat meninggal (kontinu)</li><li>Angka 1 di atas x: term (meninggal dulu)</li><li>Angka 1 di atas n|: pure endowment (bertahan hidup)</li><li>Tanpa angka: endowment (gabungan keduanya)</li><li>2 di kiri atas: momen kedua</li><li>m| di kiri bawah: ditunda m tahun</li><li>(I) atau (D): manfaat naik atau turun</li><li>xy: joint life; bar di atas xy: last survivor</li></ul>
+<h2>Rumus kunci</h2>
+<p>[[rekursi|Rekursi dan hubungan anuitas]], serta premi netto seumur hidup \(P_x=A_x/\ddot a_x\) ([[premi|premi bersih]]).</p>`},
+  {id:"pma-6",t:"Joint life, manfaat berubah, cadangan",h:String.raw`<h2>Beberapa jiwa</h2>
+<p>[[joint|Joint life dan last survivor]] untuk dua jiwa \(x\) dan \(y\).</p>
+<h2>Manfaat berubah</h2>
+<p>[[naik|Manfaat naik atau turun]] memakai notasi \((IA)\) dan \((DA)\). Rekursi: \((IA)_x=vq_x+vp_x[(IA)_{x+1}+A_{x+1}]\).</p>
+<h2>Cadangan</h2>
+<p>[[cadangan|Cadangan]] prospektif = nilai sekarang manfaat mendatang dikurangi nilai sekarang premi mendatang.</p>`}]}
+};
+const flat={}; Object.entries(C).forEach(([k,c])=>c.ch.forEach(x=>flat[x.id]={...x,k}));
+const pick=document.getElementById('pick'), chap=document.getElementById('chap');
+function show(id){
+ const ch=flat[id]||flat['matkeu-1'], k=ch.k; closeFrom(0);
+ pick.value=k; chap.innerHTML=C[k].ch.map((x,i)=>'<option value="'+x.id+'">Bab '+(i+1)+': '+x.t+'</option>').join(''); chap.value=ch.id;
+ const el=document.getElementById('content');
+ el.innerHTML='<p class="crs">'+C[k].t+'</p><h1>'+ch.t+'</h1><div class="hint">Arahkan kursor ke kata bertitik-titik untuk melihat definisi dan rumusnya.</div>'+link(ch.h);
+ document.title=ch.t+' · Catatan Aktuaria'; try{ if(location.hash!=='#'+ch.id) history.replaceState(null,'','#'+ch.id); }catch(e){} scrollTo(0,0);
+ if(window.MathJax&&MathJax.typesetPromise) MathJax.typesetPromise([el]);
+}
+pick.addEventListener('change',()=>show(C[pick.value].ch[0].id));
+chap.addEventListener('change',()=>show(chap.value));
+addEventListener('hashchange',()=>show(location.hash.slice(1)));
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeFrom(0); });
+show(location.hash.slice(1));
+</script>
+</body>
+</html>
