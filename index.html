@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id"> 
+<html lang="id">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -114,7 +114,16 @@ const T = {
  spot:{n:'Suku bunga spot',d:'Imbal hasil obligasi kupon nol berjangka t. Dipakai mendiskontokan satu arus kas di waktu t.',f:String.raw`P_0=\frac{C}{(1+s_t)^t}`,e:'s₂ = 5%: Rp100 dua tahun lagi bernilai 100/1,05² ≈ 90,70.'},
  fwd:{n:'Suku bunga forward',d:'Suku bunga untuk periode mendatang yang tersirat dari [[spot|suku bunga spot]].',f:String.raw`(1+s_n)^n=(1+s_{n-1})^{n-1}(1+f_{n-1,n})`,e:'s₁ = 4%, s₂ = 5%: f = 1,05²/1,04 − 1 ≈ 6,01%.'},
  ytm:{n:'Imbal hasil (yield to maturity)',d:'Satu tingkat i yang membuat harga sama dengan nilai sekarang semua arus kas. Dicari lewat interpolasi atau Newton. Untuk obligasi yang dapat dipanggil, pakai imbal hasil terendah.',f:String.raw`P=\sum_{k=1}^{n}\frac{Fr}{(1+i)^k}+\frac{C}{(1+i)^n}`,e:'P = 1.027,23 dengan kupon 60 dan C = 1.000, n = 3 memberi i = 5%.'},
- kurva:{n:'Kurva imbal hasil',d:'Grafik [[spot|suku bunga spot]] terhadap jangka waktu, disusun bertahap (bootstrapping) dari harga obligasi.',f:String.raw`1+s_n=\left(\frac{Fr+C}{P-Fr\sum_{k=1}^{n-1}(1+s_k)^{-k}}\right)^{1/n}`,e:'Nominal 100, kupon 6, P = 101,9143, s₁ = 4% ⇒ s₂ = 5%.'}
+ kurva:{n:'Kurva imbal hasil',d:'Grafik [[spot|suku bunga spot]] terhadap jangka waktu, disusun bertahap (bootstrapping) dari harga obligasi.',f:String.raw`1+s_n=\left(\frac{Fr+C}{P-Fr\sum_{k=1}^{n-1}(1+s_k)^{-k}}\right)^{1/n}`,e:'Nominal 100, kupon 6, P = 101,9143, s₁ = 4% ⇒ s₂ = 5%.'},
+ ditunda:{n:'Anuitas ditunda',d:'Anuitas yang pembayaran pertamanya baru terjadi setelah m periode. Nilainya adalah [[anuitas|anuitas]] biasa dikalikan [[v|v]]^m.',f:String.raw`{}_{m|}a_{\overline{n}|}=v^m a_{\overline{n}|}=a_{\overline{m+n}|}-a_{\overline{m}|}`,e:'Kupon 1.000.000 selama 6 tahun, mulai akhir tahun ke-4, i = 7%: nilai sekarang ≈ Rp3.890.916.'},
+ balon:{n:'Balloon dan drop payment',d:'Jika n tidak bulat (t = n + k), ada satu pembayaran tidak reguler: bersama pembayaran reguler terakhir (balloon, X₁), setahun sesudahnya (drop, X₃), atau tepat di n + k (X₂).',f:String.raw`PV=a_{\overline{n}|}+v^nX_1=a_{\overline{n}|}+v^{n+k}X_2=a_{\overline{n}|}+v^{n+1}X_3`,e:'Deposit 1.000, tarik 100 per tahun, i = 5%: t ≈ 14,2067, balloon X₁ ≈ 20,07, drop X₃ ≈ 21,07.'},
+ aprox:{n:'Aproksimasi suku bunga',d:'Taksiran cepat i dari a atau s bila n dan nilai anuitas g diketahui. Akurat untuk i kecil.',f:String.raw`i\approx\frac{2(n-g)}{g(n+1)}\ (a_{\overline{n}|i}=g),\qquad i\approx\frac{2(g-n)}{g(n-1)}\ (s_{\overline{n}|i}=g)`,e:'a₂ = 1,75: i ≈ 2(0,25)/(1,75 × 3) ≈ 9,52%; nilai eksak 9,38%.'},
+ portf:{n:'Portfolio rate method',d:'Bunga berubah tiap periode: setiap arus kas didiskontokan dengan rangkaian bunga periodenya secara berurutan.',f:String.raw`a_{\overline{n}|}=\sum_{j=1}^{n}\prod_{k=1}^{j}v_k,\quad v_k=(1+i_k)^{-1}`,e:'i₁ = 6%, i₂ = 6,2%, …: a₅ ≈ 4,1831.'},
+ ycm:{n:'Yield curve method',d:'Bunga berubah tiap periode: arus kas pada waktu k didiskontokan dengan bunga i_k selama k periode penuh.',f:String.raw`a_{\overline{n}|}=\sum_{k=1}^{n}v_k^k,\quad v_k=(1+i_k)^{-1}`,e:'Bunga yang sama: a₅ ≈ 4,1543.'},
+ frek:{n:'Periode bayar ≠ periode konversi',d:'Samakan dulu periode bunga dengan periode pembayaran: bunga per periode bayar j memenuhi 1 + i = (1 + j)^m, lalu pakai rumus anuitas biasa.',f:String.raw`1+i=(1+j)^m,\qquad a^{(m)}_{\overline{n}|}=\frac{i}{i^{(m)}}a_{\overline{n}|}`,e:'12% convertible annually, bayar tiap kuartal: j = 1,12^(1/4) − 1 ≈ 2,8737% per kuartal.'},
+ ia:{n:'Anuitas meningkat (Ia)',d:'Pembayaran 1, 2, …, n di akhir periode. Dapat dibaca sebagai tumpukan [[ditunda|anuitas ditunda]].',f:String.raw`(Ia)_{\overline{n}|}=\frac{\ddot a_{\overline{n}|}-nv^n}{i},\qquad (Is)_{\overline{n}|}=\frac{\ddot s_{\overline{n}|}-n}{i}`,e:'i = 5%, n = 5: (Ia)₅ ≈ 12,5664.'},
+ da:{n:'Anuitas menurun (Da)',d:'Pembayaran n, n−1, …, 1 di akhir periode. Berlaku (Ia) + (Da) = (n+1)·a.',f:String.raw`(Da)_{\overline{n}|}=\frac{n-a_{\overline{n}|}}{i},\qquad (Ds)_{\overline{n}|}=\frac{n(1+i)^n-s_{\overline{n}|}}{i}`,e:'i = 5%, n = 5: (Da)₅ ≈ 13,4105; jumlah dengan (Ia)₅ = 6 × 4,3295 ≈ 25,977.'},
+ geo:{n:'Anuitas geometri',d:'Pembayaran 1, (1+k), (1+k)², … Sama dengan anuitas level pada bunga j.',f:String.raw`PV=\frac{1-\left(\frac{1+k}{1+i}\right)^n}{i-k}=\frac{a_{\overline{n}|j}}{1+k},\ \ j=\frac{i-k}{1+k}`,e:'k = 2%, i = 5%, n = 10: PV ≈ 8,3881. Bila k = i, PV = n·v.'}
 };
 const link = s => s.replace(/\[\[(\w+)\|([^\]]+)\]\]/g,'<span class="term" data-t="$1">$2</span>');
 
@@ -157,6 +166,59 @@ const C = {
 <p>Satu rupiah hari ini lebih berharga daripada satu rupiah tahun depan karena uang bisa berbunga. Ada [[sederhana|bunga sederhana]] dan [[majemuk|bunga majemuk]]; ukuran per periodenya adalah [[bunga|suku bunga efektif]]. Pembayaran masa depan diubah menjadi [[pv|nilai sekarang]] memakai [[v|faktor diskonto]].</p>
 <h2>Anuitas</h2>
 <p>[[anuitas|Anuitas]] adalah rangkaian pembayaran berkala. Pembayaran di akhir periode disebut [[pasti|anuitas pasti]], di awal periode disebut [[awal|anuitas awal]], dan yang tak berujung disebut [[perpet|perpetuitas]].</p>`},
+  {id:"matkeu-a1",t:"Anuitas pada sembarang waktu (Pekan 1–2)",h:String.raw`<h2>Review</h2>
+<p>Notasi dasar: \(a_{\overline{n}|}=\frac{1-v^n}{i}\), \(s_{\overline{n}|}=\frac{(1+i)^n-1}{i}\), \(\ddot a_{\overline{n}|}=\frac{1-v^n}{d}\), \(\ddot s_{\overline{n}|}=\frac{(1+i)^n-1}{d}\). Dua hubungan:</p>
+\[\text{Tipe I: }\ddot a=(1+i)a,\ \ddot s=(1+i)s\qquad\text{Tipe II: }\ddot a_{\overline{n}|}=1+a_{\overline{n-1}|},\ \ddot s_{\overline{n}|}=s_{\overline{n+1}|}-1\]
+<p>Contoh: \(500\,a_{\overline{40}|4{,}5\%}=500(18{,}4016)=9.200{,}80\) untuk $500 tiap semester selama 20 tahun pada 9% convertible semiannually. Untuk dana \(1000\) yang ditarik tiap kuartal selama 10 tahun pada 8% quarterly: \(R=1000/a_{\overline{40}|2\%}=1000/27{,}3555\approx 36{,}56\).</p>
+<h2>Tiga kasus nilai pada sembarang waktu</h2>
+<p><b>Kasus 1: sebelum pembayaran pertama</b> (anuitas [[ditunda|ditunda]] \(m\) periode):</p>
+\[v^m a_{\overline{n}|}=a_{\overline{m+n}|}-a_{\overline{m}|},\qquad v^m\ddot a_{\overline{n}|}=\ddot a_{\overline{m+n}|}-\ddot a_{\overline{m}|}\]
+<p>Contoh: kupon Rp1.000.000 tiap akhir tahun selama 6 tahun, mulai akhir tahun ke-4, \(i=7\%\): \(10^6\,v^3a_{\overline{6}|}\approx\) Rp3.890.916.</p>
+<p><b>Kasus 2: setelah pembayaran terakhir</b> (nilai akumulasi \(m\) periode kemudian):</p>
+\[s_{\overline{n}|}(1+i)^m=s_{\overline{n+m}|}-s_{\overline{m}|}=a_{\overline{n}|}(1+i)^{n+m}\]
+<p>Contoh: setor Rp5.000.000 di awal tiap tahun selama 5 tahun pada 8%, lalu dibiarkan 3 tahun: \(5\cdot10^6\,\ddot s_{\overline{5}|}(1{,}08)^3\approx\) Rp39.907.229. Setor Rp4.000.000 di akhir tiap tahun, 5 tahun, 9%, ditambah 4 tahun: \(4\cdot10^6\,s_{\overline{5}|}(1{,}09)^4\approx\) Rp33.791.630.</p>
+<p><b>Kasus 3: di antara pembayaran pertama dan terakhir</b> (nilai pada waktu \(m<n\)):</p>
+\[a_{\overline{n}|}(1+i)^m\ \text{atau}\ s_{\overline{n}|}v^{n-m};\qquad \ddot a_{\overline{n}|}(1+i)^m\ \text{atau}\ \ddot s_{\overline{n}|}v^{n-m}\]
+<p>Contoh: Rp2.000.000 tiap akhir tahun selama 10 tahun, \(i=6\%\), nilai pada akhir tahun ke-6: \(2\cdot10^6\,s_{\overline{10}|}v^4\approx\) Rp20.880.848.</p>`},
+  {id:"matkeu-a2",t:"Anuitas lanjutan: waktu, suku bunga, bunga berubah (Pekan 3)",h:String.raw`<h2>Jangka waktu tidak diketahui</h2>
+<p>Dari \(a_{\overline{t}|}=g\): \(t=\dfrac{\ln(1-ig)}{-\ln(1+i)}\). Contoh \(i=6\%\), \(g=4{,}499\): \(t\approx5{,}3996\), jadi 5 pembayaran reguler dan 1 pembayaran tidak reguler. Tulis \(t=n+k\), \(0<k<1\). Pembayaran tidak reguler dapat berupa [[balon|balloon, drop, atau tepat di n+k]]:</p>
+\[PV=a_{\overline{n}|}+v^nX_1=a_{\overline{n}|}+v^{n+k}X_2=a_{\overline{n}|}+v^{n+1}X_3\]
+<p>Contoh: deposit 1.000, penarikan 100 per tahun, \(i=5\%\). \(a_{\overline{t}|}=10\Rightarrow t\approx14{,}2067\), \(n=14\), \(a_{\overline{14}|}=9{,}8986\). Sisa \(=1000-989{,}86=10{,}14\). Balloon \(X_1=10{,}14(1{,}05)^{14}\approx20{,}07\); tepat di \(t\): \(X_2\approx20{,}27\); drop \(X_3\approx21{,}07\).</p>
+<h2>Suku bunga tidak diketahui</h2>
+<p>Selesaikan \(a_{\overline{n}|i}=g\) dengan kalkulator keuangan (N = n, PMT = −1, PV = g, hitung I) atau [[aprox|aproksimasi]]:</p>
+\[i\approx\frac{2(n-g)}{g(n+1)}\quad(a),\qquad i\approx\frac{2(g-n)}{g(n-1)}\quad(s)\]
+<p>Contoh eksak: \(a_{\overline{2}|i}=1{,}75\Rightarrow v+v^2=1{,}75\Rightarrow v=\frac{-1+\sqrt8}{2}\approx0{,}9142\Rightarrow i\approx9{,}38\%\). Aproksimasi memberi 9,52%.</p>
+<h2>Bunga berubah tiap periode</h2>
+<p>Misalkan \(i_k\) adalah bunga periode ke-\(k\), \(v_k=(1+i_k)^{-1}\). Dua pendekatan: [[portf|portfolio rate method]] dan [[ycm|yield curve method]].</p>
+\[a_{\overline{n}|}=\sum_{j=1}^{n}\prod_{k=1}^{j}v_k\ \ (\text{portfolio}),\qquad a_{\overline{n}|}=\sum_{k=1}^{n}v_k^{\,k}\ \ (\text{yield curve})\]
+<p>Untuk nilai akumulasi, \(\ddot s_{\overline{n}|}=\sum_{j=1}^{n}\prod_{k=1}^{j}(1+i_{n-k+1})\) (portfolio) dan \(\ddot s_{\overline{n}|}=\sum_{k=1}^{n}(1+i_{n-k+1})^k\) (yield curve).</p>
+<p>Contoh: \(i_t=6\%+0{,}2\%(t-1)\), \(t=1,\dots,5\). Yield curve: \(a_{\overline{5}|}\approx4{,}1543\). Portfolio: \(a_{\overline{5}|}\approx4{,}1831\).</p>`},
+  {id:"matkeu-a3",t:"Periode pembayaran berbeda dengan konversi bunga (Pekan 4–6)",h:String.raw`<h2>Pendekatan numerik</h2>
+<p>Dua langkah: (1) ubah suku bunga ke periode yang sama dengan pembayaran, \(1+i=(1+j)^m\); (2) hitung dengan rumus anuitas biasa. Cara ini berlaku umum, termasuk bila waktu atau suku bunga tidak diketahui.</p>
+<p>Contoh: pinjaman Rp30.000.000, cicilan akhir kuartal selama 5 tahun, 12% convertible annually. \(j=1{,}12^{1/4}-1\approx2{,}8737\%\), \(R=30\cdot10^6/a_{\overline{20}|j}\approx\) Rp1.993.005. Contoh lain: $3000, cicilan kuartalan 5 tahun, 10% convertible semiannually: \(j=1{,}05^{1/2}-1\), \(R\approx191{,}89\).</p>
+<p>Contoh tabungan: $100 di awal tiap kuartal selama 2 tahun, lalu $200 selama 2 tahun, 12% convertible monthly. \(j=1{,}01^3-1=3{,}0301\%\), nilai akhir tahun ke-4 \(=100\,\ddot s_{\overline{16}|j}+100\,\ddot s_{\overline{8}|j}\approx2.998{,}86\).</p>
+<h2>Pendekatan aljabar: pembayaran lebih jarang</h2>
+<p>[[frek|Dengan]] \(k\) periode bunga per pembayaran, \(n=mk\), \(m\) pembayaran 1:</p>
+\[PV_{\text{imm}}=\frac{a_{\overline{n}|}}{s_{\overline{k}|}},\quad FV_{\text{imm}}=\frac{s_{\overline{n}|}}{s_{\overline{k}|}};\qquad PV_{\text{due}}=\frac{a_{\overline{n}|}}{a_{\overline{k}|}},\quad FV_{\text{due}}=\frac{s_{\overline{n}|}}{a_{\overline{k}|}}\]
+<p>Perpetuitas: immediate \(\dfrac1{i\,s_{\overline{k}|}}\), due \(\dfrac1{i\,a_{\overline{k}|}}\).</p>
+<h2>Pendekatan aljabar: pembayaran lebih sering (anuitas m-thly)</h2>
+<p>Pembayaran \(1/m\) sebanyak \(mn\) kali, \(1+i=(1+j)^m\):</p>
+\[a^{(m)}_{\overline{n}|}=\frac{1-v^n}{i^{(m)}}=\frac{i}{i^{(m)}}a_{\overline{n}|},\quad s^{(m)}_{\overline{n}|}=\frac{i}{i^{(m)}}s_{\overline{n}|},\quad \ddot a^{(m)}_{\overline{n}|}=\frac{d}{d^{(m)}}\ddot a_{\overline{n}|},\quad \ddot s^{(m)}_{\overline{n}|}=\frac{d}{d^{(m)}}\ddot s_{\overline{n}|}\]
+\[a^{(m)}_{\overline{\infty}|}=\frac1{i^{(m)}},\qquad \ddot a^{(m)}_{\overline{\infty}|}=\frac1{d^{(m)}}\]`},
+  {id:"matkeu-a4",t:"Anuitas dengan pembayaran bervariasi (Pekan 7)",h:String.raw`<h2>Progresi aritmetika</h2>
+<p>Pembayaran akhir periode: \(P,\ P+Q,\ \dots,\ P+(n-1)Q\) (syarat \(P+(n-1)Q>0\)). Mengalikan dengan \((1+i)\) lalu mengurangkan menyisakan deret geometri:</p>
+\[PV=P\,a_{\overline{n}|}+Q\,\frac{a_{\overline{n}|}-nv^n}{i},\qquad AV=P\,s_{\overline{n}|}+Q\,\frac{s_{\overline{n}|}-n}{i}\]
+<p>Kasus khusus \(P=Q=1\), anuitas [[ia|meningkat]], dan \(P=n,Q=-1\), anuitas [[da|menurun]]:</p>
+\[(Ia)_{\overline{n}|}=\frac{\ddot a_{\overline{n}|}-nv^n}{i},\quad (Is)_{\overline{n}|}=\frac{\ddot s_{\overline{n}|}-n}{i},\quad (Da)_{\overline{n}|}=\frac{n-a_{\overline{n}|}}{i},\quad (Ds)_{\overline{n}|}=\frac{n(1+i)^n-s_{\overline{n}|}}{i}\]
+<p>Intuisi: \((Ia)_{\overline{n}|}=a_{\overline{n}|}+v\,a_{\overline{n-1}|}+\dots+v^{n-1}a_{\overline{1}|}\) (tumpukan anuitas ditunda), dan \((Da)_{\overline{n}|}=a_{\overline{n}|}+a_{\overline{n-1}|}+\dots+a_{\overline{1}|}\). Identitas penting: \((Ia)_{\overline{n}|}+(Da)_{\overline{n}|}=(n+1)\,a_{\overline{n}|}\).</p>
+<p>Penyesuaian: anuitas awal \(\times(1+i)\) (atau ganti \(i\) dengan \(d\)); ditunda \(m\) periode \(\times v^m\); nilai akhir \(\times(1+i)^n\); beda \(Q\neq1\): kalikan skala, misalnya \(2,4,\dots,2n\) bernilai \(2(Ia)_{\overline{n}|}\).</p>
+<p>Contoh \(i=5\%\), \(n=5\): \((Ia)=\frac{4{,}5460-3{,}9176}{0{,}05}\approx12{,}5664\), \((Da)=\frac{5-4{,}3295}{0{,}05}\approx13{,}4105\).</p>
+<h2>Progresi geometri</h2>
+<p>Pembayaran \(1,(1+k),\dots,(1+k)^{n-1}\). Untuk [[geo|anuitas geometri]]:</p>
+\[PV=\frac{1-\left(\frac{1+k}{1+i}\right)^n}{i-k},\qquad k=i:\ PV=nv,\qquad PV=\frac{a_{\overline{n}|j}}{1+k},\ j=\frac{i-k}{1+k}\]
+<p>Contoh \(k=2\%\), \(i=5\%\), \(n=10\): \(PV\approx8{,}3881\).</p>
+<h2>Perpetuitas bervariasi</h2>
+<p>Limit \(n\to\infty\): \((Ia)_{\overline{\infty}|}=\dfrac1{id}\) (versi awal \(1/d^2\)); geometri \(\dfrac1{i-k}\) bila \(k<i\); anuitas menurun tidak mempunyai perpetuitas.</p>`},
   {id:"matkeu-2",t:"Amortisasi pinjaman (Pekan 9–10)",h:String.raw`<h2>Pembayaran dan saldo</h2>
 <p>Pinjaman \(L\) dilunasi dengan \(n\) pembayaran sama \(R\) di akhir periode. Lewat [[amort|amortisasi]], \(L=R\,a_{\overline{n}|}\) sehingga \(R=L/a_{\overline{n}|}\). [[saldo|Saldo pinjaman]] setelah pembayaran ke-\(t\):</p>
 \[B_t^{p}=R\,a_{\overline{n-t}|}\quad(\text{prospektif}),\qquad B_t^{r}=L(1+i)^t-R\,s_{\overline{t}|}\quad(\text{retrospektif})\]
