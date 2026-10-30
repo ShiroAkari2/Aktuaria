@@ -574,5 +574,118 @@ addEventListener('hashchange',()=>show(location.hash.slice(1)));
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeFrom(0); });
 show(location.hash.slice(1));
 </script>
+<script>
+(function(){
+if(typeof T==='undefined'||typeof show==='undefined'){
+ document.body.innerHTML='<p style="font:16px/1.6 sans-serif;padding:24px">Ini hanya patch. Tempel blok script ini ke file v8 tepat sebelum &lt;/body&gt;, lalu buka file v8-nya.</p>';
+ return;
+}
+const st=document.createElement('style');
+st.textContent=`.lat{font:600 15px Inter,system-ui,sans-serif;color:#fff;background:var(--accent);border:0;border-radius:6px;padding:10px 16px;margin:36px 0 8px;cursor:pointer}
+:root[data-theme="dark"] .lat{color:#12171f}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lat{color:#12171f}}
+.lsoal{border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:6px;padding:2px 18px 12px;margin:12px 0;background:var(--card);font:16px/1.65 Inter,system-ui,sans-serif}
+.lsoal details{margin-top:8px;border:1px solid var(--line);border-radius:6px;background:var(--chip)}
+.lsoal summary{cursor:pointer;font-weight:600;padding:8px 12px;color:var(--accent)}
+.lsoal details>div{padding:0 14px 10px;overflow-x:auto}`;
+document.head.appendChild(st);
+
+/* ---------- istilah baru untuk kartu hover ---------- */
+Object.assign(T,{
+ sel:{n:"Selang kepercayaan",d:"Selang acak yang dibangun dari sampel dan menangkap parameter sebenarnya dengan peluang 1−α dalam pengulangan jangka panjang. Dibangun dari sebuah [[pivot|besaran pivot]].",f:String.raw`P\big(L(X)<\theta<U(X)\big)=1-\alpha`,e:"Tingkat 95% berarti 95% selang yang dibuat dengan cara yang sama memuat θ."},
+ pivot:{n:"Besaran pivot",d:"Fungsi dari sampel dan parameter yang distribusinya tidak bergantung pada parameter. Dibalik menjadi batas selang.",f:String.raw`\frac{\bar X-\mu}{S/\sqrt n}\sim t_{n-1},\qquad \frac{(n-1)S^2}{\sigma^2}\sim\chi^2_{n-1}`,e:"Karena distribusinya diketahui, peluang 1−α dapat dibalik menjadi selang untuk μ atau σ²."},
+ tipe12:{n:"Galat tipe I, tipe II, dan kuasa",d:"α = peluang menolak H₀ padahal benar; β = peluang gagal menolak H₀ padahal salah; kuasa uji = 1−β.",f:String.raw`\alpha=P(\text{tolak }H_0\mid H_0),\quad \beta=P(\text{terima }H_0\mid H_1),\quad \text{kuasa}=1-\beta`,e:"Menurunkan α dengan n tetap akan menaikkan β."},
+ np:{n:"Lemma Neyman–Pearson",d:"Untuk H₀: θ=θ′ lawan H₁: θ=θ″ (sederhana), daerah kritis terbaik berukuran α memuat titik-titik dengan rasio likelihood kecil.",f:String.raw`\frac{L(\theta';x)}{L(\theta'';x)}\le k\ \text{di }C,\quad \ge k\ \text{di luar }C,\quad P(C;\theta')=\alpha`,e:"Normal N(θ,1), θ′=0 lawan θ″=1: daerah kritis terbaik berbentuk X̄ ≥ c."},
+ ump:{n:"Uji paling kuat seragam (UMP)",d:"Uji berukuran α yang memberi kuasa terbesar untuk setiap nilai θ di H₁ majemuk. Diperoleh bila daerah kritis [[np|Neyman–Pearson]] sama untuk semua θ″ di H₁.",f:String.raw`H_0:\theta=\theta_0\ \text{vs}\ H_1:\theta>\theta_0:\quad \bar X\ge\theta_0+z_\alpha\sigma/\sqrt n`,e:"Daerah kritis tidak memuat θ″, jadi berlaku untuk seluruh θ″ > θ₀."},
+ chi2:{n:"Uji chi-kuadrat Pearson",d:"Membandingkan frekuensi pengamatan O dengan frekuensi harapan E di bawah H₀. Untuk kecocokan distribusi maupun kebebasan tabel kontingensi.",f:String.raw`Q=\sum_{j=1}^{k}\frac{(O_j-E_j)^2}{E_j}\ \dot\sim\ \chi^2_{k-1-r}`,e:"r = banyak parameter yang ditaksir dari data. Uji kebebasan: db = (r−1)(c−1)."},
+ lrt:{n:"Uji rasio likelihood (LRT)",d:"Membandingkan likelihood maksimum di bawah H₀ dengan likelihood maksimum tanpa batasan; tolak H₀ bila Λ kecil. Memakai [[likelihood|fungsi likelihood]] dan [[mle|MLE]].",f:String.raw`\Lambda=\frac{\max_{\theta\in\omega}L(\theta)}{\max_{\theta\in\Omega}L(\theta)},\qquad -2\ln\Lambda\ \dot\sim\ \chi^2_{r}`,e:"r = selisih dimensi parameter antara Ω dan ω."}
+});
+
+/* ---------- urutan dan bab baru Statmat ---------- */
+const a=C.statmat.ch, i3=a.findIndex(x=>x.id==='statmat-3'), i2=a.findIndex(x=>x.id==='statmat-2');
+if(i3>i2){ const [b3]=a.splice(i3,1); a.splice(i2,0,b3); }   // Bayesian sebelum statistik cukup (pekan 6-8 lalu 9-10)
+
+a.push({id:"statmat-6",t:"Selang kepercayaan (Pekan 11–12)",h:String.raw`<h2>Gagasan</h2>
+<p>[[sel|Selang kepercayaan]] \(100(1-\alpha)\%\) dibangun dari [[pivot|pivot]]. Tafsirannya: bila prosedur diulang, \(100(1-\alpha)\%\) selang yang terbentuk memuat parameter. Parameter tetap; selanglah yang acak.</p>
+<h2>Mean</h2>
+\[\sigma\text{ diketahui: }\bar x\pm z_{\alpha/2}\frac{\sigma}{\sqrt n},\qquad \sigma\text{ tak diketahui: }\bar x\pm t_{\alpha/2,\,n-1}\frac{s}{\sqrt n}\]
+<h2>Selisih dua mean (variansi sama, sampel bebas)</h2>
+\[(\bar x_1-\bar x_2)\pm t_{\alpha/2,\,n_1+n_2-2}\,s_p\sqrt{\tfrac1{n_1}+\tfrac1{n_2}},\qquad s_p^2=\frac{(n_1-1)s_1^2+(n_2-1)s_2^2}{n_1+n_2-2}\]
+<h2>Proporsi dan selisih proporsi</h2>
+\[\hat p\pm z_{\alpha/2}\sqrt{\tfrac{\hat p(1-\hat p)}{n}},\qquad (\hat p_1-\hat p_2)\pm z_{\alpha/2}\sqrt{\tfrac{\hat p_1(1-\hat p_1)}{n_1}+\tfrac{\hat p_2(1-\hat p_2)}{n_2}}\]
+<h2>Variansi dan rasio dua variansi</h2>
+\[\left(\frac{(n-1)s^2}{\chi^2_{\alpha/2,\,n-1}},\ \frac{(n-1)s^2}{\chi^2_{1-\alpha/2,\,n-1}}\right),\qquad \left(\frac{s_1^2/s_2^2}{F_{\alpha/2,\,n_1-1,\,n_2-1}},\ \frac{s_1^2}{s_2^2}F_{\alpha/2,\,n_2-1,\,n_1-1}\right)\]
+<p>Notasi \(\chi^2_{\alpha,\nu}\) dan \(F_{\alpha,\nu_1,\nu_2}\) adalah titik dengan luas \(\alpha\) di ekor kanan.</p>
+<h2>Contoh soal dan pembahasan</h2>
+<div class="soal"><p><b>Soal.</b> Sampel \(n=16\) dari populasi normal: \(\bar x=50\), \(s=8\). Buat selang 95% untuk \(\mu\).</p>
+<p><b>Diketahui:</b> \(n=16\), \(\bar x=50\), \(s=8\), \(t_{0{,}025;15}=2{,}131\).</p>
+<p><b>Ditanyakan:</b> Selang kepercayaan 95% untuk \(\mu\).</p>
+<p><b>Penyelesaian:</b> Galat baku \(=8/4=2\); margin \(=2{,}131\times2=4{,}262\). Selang: \(50\pm4{,}262=(45{,}74;\ 54{,}26)\).</p>
+<p><b>Interpretasi:</b> Dengan keyakinan 95%, rata-rata populasi berada antara 45,74 dan 54,26.</p></div>`});
+
+a.push({id:"statmat-7",t:"Uji hipotesis dan daerah kritis terbaik (Pekan 13–14)",h:String.raw`<h2>Kerangka uji</h2>
+<p>Hipotesis nol \(H_0\) diuji lawan \(H_1\) memakai daerah kritis \(C\): tolak \(H_0\) bila \((X_1,\dots,X_n)\in C\). Dua kesalahan ([[tipe12|galat tipe I dan II]]): \(\alpha=P(C;H_0)\), \(\beta=1-P(C;H_1)\), dan kuasa \(=1-\beta\). Hipotesis sederhana menentukan distribusi sepenuhnya; majemuk tidak.</p>
+<h2>Daerah kritis terbaik</h2>
+<p>Di antara semua daerah kritis berukuran \(\alpha\), yang terbaik memaksimumkan kuasa. Untuk \(H_0:\theta=\theta'\) lawan \(H_1:\theta=\theta''\), [[np|lemma Neyman–Pearson]] memberi \(C\) dengan \(\dfrac{L(\theta')}{L(\theta'')}\le k\) dan \(P(C;\theta')=\alpha\).</p>
+<h2>Contoh: Normal \(N(\theta,1)\)</h2>
+<p>\(H_0:\theta=0\) lawan \(H_1:\theta=1\). Rasionya \(\dfrac{L(0)}{L(1)}=\exp\!\big(-\sum x_i+\tfrac n2\big)\le k\iff\bar x\ge c\). Untuk \(n=25\), \(\alpha=0{,}05\): \(c=1{,}645/5=0{,}329\). Kuasa di \(\theta=1\): \(P(\bar X\ge0{,}329)=P(Z\ge-3{,}355)\approx0{,}9996\).</p>
+<h2>Uji UMP</h2>
+<p>Bila \(H_1\) majemuk dan daerah kritisnya sama untuk setiap \(\theta''\), uji tersebut [[ump|UMP]]. Untuk \(H_0:\theta=\theta_0\) lawan \(H_1:\theta>\theta_0\) pada \(N(\theta,\sigma^2)\): tolak bila \(\bar X\ge\theta_0+z_\alpha\sigma/\sqrt n\).</p>
+<h2>Contoh soal dan pembahasan</h2>
+<div class="soal"><p><b>Soal.</b> \(X\sim N(\theta,\,4)\), \(n=16\). Uji \(H_0:\theta=10\) lawan \(H_1:\theta>10\) pada \(\alpha=0{,}05\). Tentukan daerah kritis dan kuasa di \(\theta=11\).</p>
+<p><b>Diketahui:</b> \(\sigma=2\), \(n=16\), \(\theta_0=10\), \(z_{0{,}05}=1{,}645\).</p>
+<p><b>Ditanyakan:</b> \(c\) dan kuasa pada \(\theta=11\).</p>
+<p><b>Penyelesaian:</b> \(c=10+1{,}645\cdot\frac{2}{4}=10{,}8225\). Kuasa \(=P(\bar X\ge10{,}8225\mid\theta=11)=P\big(Z\ge\frac{10{,}8225-11}{0{,}5}\big)=P(Z\ge-0{,}355)\approx0{,}6387\).</p>
+<p><b>Interpretasi:</b> Tolak \(H_0\) bila \(\bar x\ge10{,}8225\). Bila \(\theta\) sebenarnya 11, uji ini mendeteksinya dengan peluang sekitar 64%.</p></div>`});
+
+a.push({id:"statmat-8",t:"Uji chi-kuadrat dan rasio likelihood (Pekan 15–16)",h:String.raw`<h2>Uji chi-kuadrat Pearson</h2>
+<p>[[chi2|Statistik Pearson]] \(Q=\sum\frac{(O_j-E_j)^2}{E_j}\) berdistribusi hampiran \(\chi^2\). Uji kecocokan: db \(=k-1-r\), \(r\) parameter yang ditaksir. Uji kebebasan tabel \(r\times c\): \(E_{ij}=\frac{\text{total baris}\times\text{total kolom}}{N}\), db \(=(r-1)(c-1)\). Syarat umum: \(E_j\ge5\). Tolak \(H_0\) bila \(Q>\chi^2_{\alpha,\text{db}}\).</p>
+<h2>Uji rasio likelihood</h2>
+<p>[[lrt|LRT]]: \(\Lambda=\dfrac{\max_{\omega}L}{\max_{\Omega}L}\in(0,1]\); tolak \(H_0\) bila \(\Lambda\le k\). Untuk sampel besar \(-2\ln\Lambda\dot\sim\chi^2_r\). Pada \(N(\theta,1)\) dengan \(H_0:\theta=\theta_0\): \(\hat\theta=\bar X\), \(\Lambda=\exp\!\big(-\tfrac n2(\bar x-\theta_0)^2\big)\), jadi \(-2\ln\Lambda=n(\bar x-\theta_0)^2=Z^2\sim\chi^2_1\) (eksak).</p>
+<h2>Contoh soal dan pembahasan</h2>
+<div class="soal"><p><b>Soal.</b> Dadu dilempar 60 kali; frekuensi mata 1 sampai 6: 8, 12, 9, 11, 10, 10. Ujilah apakah dadu adil pada \(\alpha=0{,}05\) (\(\chi^2_{0{,}05;5}=11{,}07\)).</p>
+<p><b>Diketahui:</b> \(n=60\), \(E_j=10\), \(k=6\), tidak ada parameter ditaksir.</p>
+<p><b>Ditanyakan:</b> Keputusan uji.</p>
+<p><b>Penyelesaian:</b> \(Q=\frac{4+4+1+1+0+0}{10}=1{,}0\), db \(=5\). Karena \(1{,}0<11{,}07\), \(H_0\) tidak ditolak.</p>
+<p><b>Interpretasi:</b> Tidak ada bukti dadu tidak adil; penyimpangan frekuensi masih wajar akibat peluang.</p></div>`});
+
+/* ---------- LATIHAN SOAL: isi di sini. Format: P['id-bab']=[{q:"soal",a:"pembahasan"},...] ---------- */
+window.P={};
+P['statmat-2']=[
+ {q:String.raw`\(X_1,\dots,X_n\) sampel dari \(N(\theta,\sigma^2)\), \(\sigma^2\) diketahui. Tunjukkan \(Y=\sum X_i\) statistik cukup untuk \(\theta\).`,
+  a:String.raw`<p>Lewat faktorisasi [[neyman|Neyman]]. Karena \(\sum(x_i-\theta)^2=\sum x_i^2-2\theta\sum x_i+n\theta^2\):</p>
+\[\prod f(x_i;\theta)=\underbrace{\exp\!\Big(\frac{\theta\sum x_i-n\theta^2/2}{\sigma^2}\Big)}_{k_1(\sum x_i;\theta)}\cdot\underbrace{(2\pi\sigma^2)^{-n/2}\exp\!\Big(-\frac{\sum x_i^2}{2\sigma^2}\Big)}_{k_2(x_1,\dots,x_n)}\]
+<p>\(k_2\) tidak memuat \(\theta\), jadi \(\sum X_i\) cukup. Akibatnya \(\bar X\) juga cukup.</p>`},
+ {q:String.raw`\(X_1,\dots,X_n\) sampel dari Uniform\((0,\theta)\). Tunjukkan \(Y=\max X_i\) statistik cukup untuk \(\theta\).`,
+  a:String.raw`<p>\(\prod f(x_i;\theta)=\theta^{-n}\,\mathbf 1\{\max x_i<\theta\}\cdot\mathbf 1\{\min x_i>0\}\). Faktor pertama bergantung pada data hanya lewat \(\max x_i\) (= \(k_1\)), faktor kedua bebas \(\theta\) (= \(k_2\)). Maka \(\max X_i\) cukup.</p>`}];
+P['statmat-6']=[
+ {q:String.raw`Survei \(n=200\) pemilih: 60 mendukung program. Buat selang 95% untuk proporsi pendukung.`,
+  a:String.raw`<p>\(\hat p=60/200=0{,}3\). Galat baku \(=\sqrt{0{,}3\cdot0{,}7/200}=0{,}0324\). Margin \(=1{,}96\times0{,}0324=0{,}0635\). Selang: \((0{,}2365;\ 0{,}3635)\).</p><p>Interpretasi: proporsi pendukung populasi diperkirakan 23,7% sampai 36,4% dengan keyakinan 95%.</p>`},
+ {q:String.raw`Sampel \(n=10\) dari populasi normal memberi \(s^2=16\). Buat selang 95% untuk \(\sigma^2\). (\(\chi^2_{0{,}025;9}=19{,}023\), \(\chi^2_{0{,}975;9}=2{,}700\))`,
+  a:String.raw`<p>\((n-1)s^2=9\times16=144\). Batas bawah \(=144/19{,}023=7{,}57\); batas atas \(=144/2{,}700=53{,}33\). Selang: \((7{,}57;\ 53{,}33)\).</p><p>Interpretasi: selang variansi lebar karena \(n\) kecil dan distribusi \(\chi^2\) tidak simetris.</p>`}];
+P['statmat-7']=[
+ {q:String.raw`Pada contoh \(N(\theta,1)\), \(H_0:\theta=0\) lawan \(H_1:\theta=1\), \(n=25\), \(\alpha=0{,}05\). Hitung \(\beta\).`,
+  a:String.raw`<p>Daerah kritis \(\bar X\ge0{,}329\). \(\beta=P(\bar X<0{,}329\mid\theta=1)=P(Z<-3{,}355)\approx0{,}0004\), sehingga kuasa \(\approx0{,}9996\).</p>`}];
+P['statmat-8']=[
+ {q:String.raw`Sampel \(n=25\) dari \(N(\theta,1)\) memberi \(\bar x=0{,}5\). Uji \(H_0:\theta=0\) dengan LRT pada \(\alpha=0{,}05\) (\(\chi^2_{0{,}05;1}=3{,}84\)).`,
+  a:String.raw`<p>\(-2\ln\Lambda=n(\bar x-\theta_0)^2=25(0{,}5)^2=6{,}25\). Karena \(6{,}25>3{,}84\), tolak \(H_0\). Setara dengan uji \(z\): \(z=0{,}5\times5=2{,}5\), \(z^2=6{,}25\).</p>`}];
+
+/* ---------- bangun ulang indeks bab dan pasang tampilan latihan ---------- */
+C.statmat.ch.forEach(x=>flat[x.id]={...x,k:'statmat'});
+const oldShow=show;
+show=function(id){
+ oldShow(id);
+ const ch=flat[id]||flat['matkeu-1'], L=P[ch.id]; if(!L) return;
+ document.getElementById('content').insertAdjacentHTML('beforeend',
+  '<button class="lat" id="latBtn" aria-expanded="false">Latihan soal ('+L.length+') ▾</button><div id="latBox" hidden>'+
+  L.map((s,i)=>'<div class="lsoal"><p><b>Soal '+(i+1)+'.</b> '+link(s.q)+'</p><details><summary>Pembahasan</summary><div>'+link(s.a)+'</div></details></div>').join('')+'</div>');
+ const b=document.getElementById('latBtn'), x=document.getElementById('latBox');
+ b.onclick=()=>{ x.hidden=!x.hidden; b.setAttribute('aria-expanded',String(!x.hidden)); b.textContent='Latihan soal ('+L.length+') '+(x.hidden?'▾':'▴'); };
+ if(window.MathJax&&MathJax.typesetPromise) MathJax.typesetPromise([x]);
+};
+show(location.hash.slice(1));
+})();
+</script>
+
 </body>
 </html>
