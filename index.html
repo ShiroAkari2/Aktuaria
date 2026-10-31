@@ -140,7 +140,8 @@ const T = {
  redington:{n:'Imunisasi Redington',d:'Tiga syarat agar surplus aset terhadap liabilitas tidak turun akibat pergeseran bunga kecil: nilai sekarang sama, [[dur|durasi]] sama, dan [[konv|konveksitas]] aset lebih besar.',f:String.raw`PV_A=PV_L,\qquad D_A=D_L,\qquad C_A>C_L`,e:'Aset zero-coupon 2 dan 6 tahun (bobot 50:50) meng-imunisasi liabilitas di tahun ke-4.'},
  dgap:{n:'Duration gap',d:'Selisih durasi aset dan durasi liabilitas (disesuaikan rasio nilainya). Dipantau berkala; gap nol berarti surplus kebal terhadap pergeseran paralel kecil.',f:String.raw`\text{gap}=D_A-\frac{PV_L}{PV_A}D_L`,e:'Bila D_A = D_L dan PV_A = PV_L, gap = 0.'}
 };
-const link = s => s.replace(/\[\[(\w+)\|([^\]]+)\]\]/g,'<span class="term" data-t="$1">$2</span>');
+const esc = s => s.replace(/\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\)/g, m => m.replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+const link = s => esc(s).replace(/\[\[(\w+)\|([^\]]+)\]\]/g,'<span class="term" data-t="$1">$2</span>');
 
 const cards = []; let timer = null, openT = null;
 function closeFrom(l){ while(cards.length>l){ cards.pop().el.remove(); } }
@@ -576,10 +577,7 @@ show(location.hash.slice(1));
 </script>
 <script>
 (function(){
-if(typeof T==='undefined'||typeof show==='undefined'){
- document.body.innerHTML='<p style="font:16px/1.6 sans-serif;padding:24px">Ini hanya patch. Tempel blok script ini ke file v8 tepat sebelum &lt;/body&gt;, lalu buka file v8-nya.</p>';
- return;
-}
+if(typeof T==='undefined'||typeof show==='undefined'){return;}
 const st=document.createElement('style');
 st.textContent=`.lat{font:600 15px Inter,system-ui,sans-serif;color:#fff;background:var(--accent);border:0;border-radius:6px;padding:10px 16px;margin:36px 0 8px;cursor:pointer}
 :root[data-theme="dark"] .lat{color:#12171f}
@@ -589,8 +587,6 @@ st.textContent=`.lat{font:600 15px Inter,system-ui,sans-serif;color:#fff;backgro
 .lsoal summary{cursor:pointer;font-weight:600;padding:8px 12px;color:var(--accent)}
 .lsoal details>div{padding:0 14px 10px;overflow-x:auto}`;
 document.head.appendChild(st);
-
-/* ---------- istilah baru untuk kartu hover ---------- */
 Object.assign(T,{
  sel:{n:"Selang kepercayaan",d:"Selang acak yang dibangun dari sampel dan menangkap parameter sebenarnya dengan peluang 1−α dalam pengulangan jangka panjang. Dibangun dari sebuah [[pivot|besaran pivot]].",f:String.raw`P\big(L(X)<\theta<U(X)\big)=1-\alpha`,e:"Tingkat 95% berarti 95% selang yang dibuat dengan cara yang sama memuat θ."},
  pivot:{n:"Besaran pivot",d:"Fungsi dari sampel dan parameter yang distribusinya tidak bergantung pada parameter. Dibalik menjadi batas selang.",f:String.raw`\frac{\bar X-\mu}{S/\sqrt n}\sim t_{n-1},\qquad \frac{(n-1)S^2}{\sigma^2}\sim\chi^2_{n-1}`,e:"Karena distribusinya diketahui, peluang 1−α dapat dibalik menjadi selang untuk μ atau σ²."},
@@ -600,11 +596,8 @@ Object.assign(T,{
  chi2:{n:"Uji chi-kuadrat Pearson",d:"Membandingkan frekuensi pengamatan O dengan frekuensi harapan E di bawah H₀. Untuk kecocokan distribusi maupun kebebasan tabel kontingensi.",f:String.raw`Q=\sum_{j=1}^{k}\frac{(O_j-E_j)^2}{E_j}\ \dot\sim\ \chi^2_{k-1-r}`,e:"r = banyak parameter yang ditaksir dari data. Uji kebebasan: db = (r−1)(c−1)."},
  lrt:{n:"Uji rasio likelihood (LRT)",d:"Membandingkan likelihood maksimum di bawah H₀ dengan likelihood maksimum tanpa batasan; tolak H₀ bila Λ kecil. Memakai [[likelihood|fungsi likelihood]] dan [[mle|MLE]].",f:String.raw`\Lambda=\frac{\max_{\theta\in\omega}L(\theta)}{\max_{\theta\in\Omega}L(\theta)},\qquad -2\ln\Lambda\ \dot\sim\ \chi^2_{r}`,e:"r = selisih dimensi parameter antara Ω dan ω."}
 });
-
-/* ---------- urutan dan bab baru Statmat ---------- */
 const a=C.statmat.ch, i3=a.findIndex(x=>x.id==='statmat-3'), i2=a.findIndex(x=>x.id==='statmat-2');
-if(i3>i2){ const [b3]=a.splice(i3,1); a.splice(i2,0,b3); }   // Bayesian sebelum statistik cukup (pekan 6-8 lalu 9-10)
-
+if(i3>i2){ const [b3]=a.splice(i3,1); a.splice(i2,0,b3); }
 a.push({id:"statmat-6",t:"Selang kepercayaan (Pekan 11–12)",h:String.raw`<h2>Gagasan</h2>
 <p>[[sel|Selang kepercayaan]] \(100(1-\alpha)\%\) dibangun dari [[pivot|pivot]]. Tafsirannya: bila prosedur diulang, \(100(1-\alpha)\%\) selang yang terbentuk memuat parameter. Parameter tetap; selanglah yang acak.</p>
 <h2>Mean</h2>
@@ -622,7 +615,6 @@ a.push({id:"statmat-6",t:"Selang kepercayaan (Pekan 11–12)",h:String.raw`<h2>G
 <p><b>Ditanyakan:</b> Selang kepercayaan 95% untuk \(\mu\).</p>
 <p><b>Penyelesaian:</b> Galat baku \(=8/4=2\); margin \(=2{,}131\times2=4{,}262\). Selang: \(50\pm4{,}262=(45{,}74;\ 54{,}26)\).</p>
 <p><b>Interpretasi:</b> Dengan keyakinan 95%, rata-rata populasi berada antara 45,74 dan 54,26.</p></div>`});
-
 a.push({id:"statmat-7",t:"Uji hipotesis dan daerah kritis terbaik (Pekan 13–14)",h:String.raw`<h2>Kerangka uji</h2>
 <p>Hipotesis nol \(H_0\) diuji lawan \(H_1\) memakai daerah kritis \(C\): tolak \(H_0\) bila \((X_1,\dots,X_n)\in C\). Dua kesalahan ([[tipe12|galat tipe I dan II]]): \(\alpha=P(C;H_0)\), \(\beta=1-P(C;H_1)\), dan kuasa \(=1-\beta\). Hipotesis sederhana menentukan distribusi sepenuhnya; majemuk tidak.</p>
 <h2>Daerah kritis terbaik</h2>
@@ -637,7 +629,6 @@ a.push({id:"statmat-7",t:"Uji hipotesis dan daerah kritis terbaik (Pekan 13–14
 <p><b>Ditanyakan:</b> \(c\) dan kuasa pada \(\theta=11\).</p>
 <p><b>Penyelesaian:</b> \(c=10+1{,}645\cdot\frac{2}{4}=10{,}8225\). Kuasa \(=P(\bar X\ge10{,}8225\mid\theta=11)=P\big(Z\ge\frac{10{,}8225-11}{0{,}5}\big)=P(Z\ge-0{,}355)\approx0{,}6387\).</p>
 <p><b>Interpretasi:</b> Tolak \(H_0\) bila \(\bar x\ge10{,}8225\). Bila \(\theta\) sebenarnya 11, uji ini mendeteksinya dengan peluang sekitar 64%.</p></div>`});
-
 a.push({id:"statmat-8",t:"Uji chi-kuadrat dan rasio likelihood (Pekan 15–16)",h:String.raw`<h2>Uji chi-kuadrat Pearson</h2>
 <p>[[chi2|Statistik Pearson]] \(Q=\sum\frac{(O_j-E_j)^2}{E_j}\) berdistribusi hampiran \(\chi^2\). Uji kecocokan: db \(=k-1-r\), \(r\) parameter yang ditaksir. Uji kebebasan tabel \(r\times c\): \(E_{ij}=\frac{\text{total baris}\times\text{total kolom}}{N}\), db \(=(r-1)(c-1)\). Syarat umum: \(E_j\ge5\). Tolak \(H_0\) bila \(Q>\chi^2_{\alpha,\text{db}}\).</p>
 <h2>Uji rasio likelihood</h2>
@@ -648,8 +639,6 @@ a.push({id:"statmat-8",t:"Uji chi-kuadrat dan rasio likelihood (Pekan 15–16)",
 <p><b>Ditanyakan:</b> Keputusan uji.</p>
 <p><b>Penyelesaian:</b> \(Q=\frac{4+4+1+1+0+0}{10}=1{,}0\), db \(=5\). Karena \(1{,}0<11{,}07\), \(H_0\) tidak ditolak.</p>
 <p><b>Interpretasi:</b> Tidak ada bukti dadu tidak adil; penyimpangan frekuensi masih wajar akibat peluang.</p></div>`});
-
-/* ---------- LATIHAN SOAL: isi di sini. Format: P['id-bab']=[{q:"soal",a:"pembahasan"},...] ---------- */
 window.P={};
 P['statmat-2']=[
  {q:String.raw`\(X_1,\dots,X_n\) sampel dari \(N(\theta,\sigma^2)\), \(\sigma^2\) diketahui. Tunjukkan \(Y=\sum X_i\) statistik cukup untuk \(\theta\).`,
@@ -669,8 +658,6 @@ P['statmat-7']=[
 P['statmat-8']=[
  {q:String.raw`Sampel \(n=25\) dari \(N(\theta,1)\) memberi \(\bar x=0{,}5\). Uji \(H_0:\theta=0\) dengan LRT pada \(\alpha=0{,}05\) (\(\chi^2_{0{,}05;1}=3{,}84\)).`,
   a:String.raw`<p>\(-2\ln\Lambda=n(\bar x-\theta_0)^2=25(0{,}5)^2=6{,}25\). Karena \(6{,}25>3{,}84\), tolak \(H_0\). Setara dengan uji \(z\): \(z=0{,}5\times5=2{,}5\), \(z^2=6{,}25\).</p>`}];
-
-/* ---------- bangun ulang indeks bab dan pasang tampilan latihan ---------- */
 C.statmat.ch.forEach(x=>flat[x.id]={...x,k:'statmat'});
 const oldShow=show;
 show=function(id){
@@ -684,6 +671,90 @@ show=function(id){
  if(window.MathJax&&MathJax.typesetPromise) MathJax.typesetPromise([x]);
 };
 show(location.hash.slice(1));
+})();
+</script>
+
+<script>
+/* PATCH PMA 11 BAB: tempel blok ini di file V10 tepat sebelum </body> (setelah script patch yang sudah ada) */
+(function(){
+if(typeof T==='undefined'||typeof C==='undefined'||typeof flat==='undefined'){return;}
+const EX=(q,dk,dt,ps,it)=>'<h2>Contoh soal dan pembahasan</h2>\n<div class="soal"><p><b>Soal.</b> '+q+'</p>\n<p><b>Diketahui:</b> '+dk+'</p>\n<p><b>Ditanyakan:</b> '+dt+'</p>\n<p><b>Penyelesaian:</b> '+ps+'</p>\n<p><b>Interpretasi:</b> '+it+'</p></div>';
+Object.assign(T,{
+ nominal:{n:"Suku bunga nominal dan force of interest",d:"Suku bunga nominal i^(m) dikonversi m kali setahun; force of interest δ adalah laju bunga seketika. Semuanya setara dengan [[bunga|suku bunga efektif]] i.",f:String.raw`1+i=\Big(1+\frac{i^{(m)}}{m}\Big)^m=\Big(1-\frac{d^{(m)}}{m}\Big)^{-m}=e^{\delta},\qquad \delta=\ln(1+i)`,e:"i^(4) = 8%: i = 1,02⁴ − 1 ≈ 8,2432%, δ ≈ 7,921%."},
+ surv:{n:"Fungsi survival s(x)",d:"Peluang usia kematian X melebihi x. Dari sini diturunkan [[tpx|peluang hidup]] dan [[mort|tabel mortalitas]].",f:String.raw`s(x)=P(X\gt x)=1-F(x),\qquad {}_tp_x=\frac{s(x+t)}{s(x)}`,e:"s(x) = 1 − x/100: ₁₀p₄₀ = s(50)/s(40) = 0,5/0,6 ≈ 0,8333."},
+ tx:{n:"Sisa hidup T_x dan curtate K_x",d:"T_x adalah sisa hidup kontinu seseorang usia x; K_x = ⌊T_x⌋ adalah jumlah tahun penuh yang dijalani (curtate). K_x menentukan [[pvrv|PVRV]] asuransi diskrit.",f:String.raw`K_x=\lfloor T_x\rfloor,\qquad P(K_x=k)={}_kp_x\,q_{x+k}={}_{k|}q_x`,e:"Meninggal pada usia x + 9,4: T = 9,4 dan K = 9."},
+ mu:{n:"Laju kematian (force of mortality) μ_x",d:"Laju kematian seketika pada usia x, diberikan masih hidup. Kepadatan T_x adalah ₜpₓ·μ_{x+t}.",f:String.raw`\mu_x=\frac{f(x)}{s(x)}=-\frac{d}{dx}\ln s(x),\qquad {}_tp_x=\exp\!\Big(-\int_0^t\mu_{x+u}\,du\Big)`,e:"μ konstan 0,02: ₁₀p = e^(−0,2) ≈ 0,8187."},
+ ex:{n:"Harapan hidup",d:"Harapan hidup lengkap (kontinu) dan curtate (diskrit); selisihnya kira-kira 1/2 tahun.",f:String.raw`\mathring e_x=\int_0^\infty{}_tp_x\,dt,\qquad e_x=E[K_x]=\sum_{k=1}^{\infty}{}_kp_x`,e:"μ konstan 0,02: e̊ = 1/μ = 50."},
+ frac:{n:"Asumsi usia fractional",d:"Cara menginterpolasi peluang di antara usia bulat: UDD (kematian merata), constant force (CFM), Balducci.",f:String.raw`\text{UDD: }{}_sq_x=s\,q_x;\quad \text{CFM: }{}_sp_x=p_x^{\,s};\quad \text{Balducci: }{}_{1-s}q_{x+s}=(1-s)q_x`,e:"q_x = 0,1, s = 0,5: UDD 0,05; CFM 0,0513; Balducci 0,0526."},
+ akon:{n:"Anuitas hidup kontinu",d:"Pembayaran kontinu 1 per tahun selama hidup; dihubungkan dengan asuransi saat meninggal (lihat [[kontinu|asuransi kontinu]]).",f:String.raw`\bar a_x=\int_0^\infty v^t\,{}_tp_x\,dt=\frac{1-\bar A_x}{\delta}`,e:"μ = 0,04, δ = 0,06: ā = 1/(μ+δ) = 10."},
+ pek:{n:"Prinsip ekivalensi",d:"Premi ditetapkan agar rata-rata kerugian nol: nilai sekarang aktuaria premi sama dengan nilai sekarang aktuaria manfaat. Menghasilkan [[premi|premi bersih]].",f:String.raw`E[L]=0\iff PV(\text{premi})=PV(\text{manfaat})`,e:"P · ä_x = A_x."},
+ lossL:{n:"Kerugian L saat polis dibuat",d:"Selisih nilai sekarang manfaat dan premi sebagai peubah acak. Untuk premi bersih, E[L] = 0.",f:String.raw`L=v^{K_x+1}-P\,\ddot a_{\overline{K_x+1}|}=Z\Big(1+\frac Pd\Big)-\frac Pd,\quad \operatorname{Var}(L)=\Big(1+\frac Pd\Big)^2\operatorname{Var}(Z)`,e:"Whole life premi bersih: Var(L) = (²A − A²)/(d·ä)²."},
+ pkon:{n:"Premi kontinu",d:"Premi dibayar kontinu dengan laju P̄ per tahun dan manfaat saat meninggal. Analog diskrit dengan δ menggantikan d.",f:String.raw`\bar P(\bar A_x)=\frac{\bar A_x}{\bar a_x}=\frac1{\bar a_x}-\delta,\qquad \operatorname{Var}(\bar L)=\frac{{}^2\bar A_x-\bar A_x^2}{(\delta\bar a_x)^2}`,e:"μ konstan: P̄ = μ."}
+});
+const O={}; C.pma.ch.forEach(x=>O[x.id]=x);
+const exOf=h=>h.slice(h.indexOf('<h2>Contoh soal'));
+const n1={id:"pma-n1",t:"Suku bunga (Pekan 1)",h:String.raw`<h2>Ukuran suku bunga</h2>
+<p>Suku bunga efektif \(i\), faktor diskonto \(v=\frac1{1+i}\), diskonto \(d=iv\), serta [[nominal|bunga nominal dan force of interest]]:</p>
+\[1+i=\Big(1+\frac{i^{(m)}}{m}\Big)^m=\Big(1-\frac{d^{(m)}}{m}\Big)^{-m}=e^{\delta}=v^{-1}=(1-d)^{-1}\]
+<p>Bila \(\delta_t\) berubah menurut waktu, faktor akumulasi \(A(t)=\exp\!\big(\int_0^t\delta_s\,ds\big)\). Untuk \(m\ge2\) berlaku \(d\lt d^{(m)}\lt\delta\lt i^{(m)}\lt i\).</p>`+EX(String.raw`Suku bunga nominal \(i^{(4)}=8\%\). Hitung \(i\), \(d\), dan \(\delta\).`,String.raw`\(i^{(4)}=0{,}08\), \(m=4\).`,String.raw`\(i\), \(d\), \(\delta\).`,String.raw`\(i=(1+0{,}02)^4-1=0{,}082432\). \(d=\frac i{1+i}=0{,}076155\). \(\delta=\ln1{,}082432=0{,}079211\).`,'Bunga yang dikonversi tiap kuartal setara dengan 8,2432% per tahun efektif; urutan \(d\lt\delta\lt i\) terpenuhi.')};
+const n2={id:"pma-n2",t:"Anuitas awal, akhir, dan kontinu (Pekan 2)",h:String.raw`<h2>Anuitas pasti</h2>
+<p>Pembayaran 1 per tahun selama \(n\) tahun: [[awal|anuitas awal]], [[pasti|anuitas akhir]], kontinu, dan \(m\) kali setahun.</p>
+\[\ddot a_{\overline n|}=\frac{1-v^n}{d},\quad a_{\overline n|}=\frac{1-v^n}{i},\quad \bar a_{\overline n|}=\int_0^nv^t\,dt=\frac{1-v^n}{\delta},\quad \ddot a^{(m)}_{\overline n|}=\frac{1-v^n}{d^{(m)}}\]
+<p>Karena \(d\lt\delta\lt i\): \(a_{\overline n|}\lt\bar a_{\overline n|}\lt\ddot a_{\overline n|}\). Hubungan: \(\ddot a_{\overline n|}=(1+i)a_{\overline n|}=1+a_{\overline{n-1}|}\). Perpetuitas: \(\frac1i\), \(\frac1\delta\), \(\frac1d\).</p>`+EX(String.raw`Hitung \(\ddot a_{\overline{10}|}\), \(a_{\overline{10}|}\), dan \(\bar a_{\overline{10}|}\) pada \(i=5\%\).`,String.raw`\(i=5\%\), \(n=10\), \(v^{10}=0{,}6139\).`,'Tiga nilai anuitas.',String.raw`\(a=\frac{1-0{,}6139}{0{,}05}=7{,}7217\). \(\ddot a=1{,}05a=8{,}1078\). \(\delta=0{,}04879\), \(\bar a=\frac{0{,}3861}{0{,}04879}=7{,}9132\).`,'Anuitas awal paling besar karena tiap pembayaran lebih cepat setahun; anuitas kontinu berada di antara kedua yang lain.')};
+const n3={id:"pma-n3",t:"Fungsi survival, curtate lifetime, laju kematian (Pekan 3–4)",h:String.raw`<h2>Fungsi survival</h2>
+<p>[[surv|\(s(x)=P(X\gt x)\)]] dan \({}_tp_x=\frac{s(x+t)}{s(x)}\), \({}_tq_x=1-{}_tp_x\), \({}_{u|t}q_x={}_up_x-{}_{u+t}p_x\).</p>
+<h2>Sisa hidup</h2>
+<p>[[tx|\(T_x\)]] adalah sisa hidup kontinu dengan fungsi distribusi \({}_tq_x\) dan kepadatan \({}_tp_x\,\mu_{x+t}\). Curtate: \(K_x=\lfloor T_x\rfloor\), \(P(K_x=k)={}_kp_x\,q_{x+k}\).</p>
+<h2>Laju kematian</h2>
+<p>[[mu|\(\mu_x\)]] \(=-\frac{d}{dx}\ln s(x)\), sehingga \({}_tp_x=\exp\!\big(-\int_0^t\mu_{x+u}du\big)\). [[ex|Harapan hidup]]: \(\mathring e_x=\int_0^\infty{}_tp_x\,dt\), \(e_x=\sum_{k\ge1}{}_kp_x\), dan \(\mathring e_x\approx e_x+\tfrac12\).</p>`+EX(String.raw`Usia kematian berdistribusi seragam \(s(x)=1-x/100\). Untuk \(x=40\) hitung \({}_{10}p_{40}\), \(\mu_{40}\), \(\mathring e_{40}\), dan \(P(K_{40}=9)\).`,String.raw`\(s(x)=1-x/100\), \(0\le x\le100\).`,String.raw`\({}_{10}p_{40}\), \(\mu_{40}\), \(\mathring e_{40}\), \(P(K_{40}=9)\).`,String.raw`\({}_{10}p_{40}=\frac{s(50)}{s(40)}=\frac{0{,}5}{0{,}6}=0{,}8333\). \(\mu_x=\frac{1/100}{1-x/100}=\frac1{100-x}\Rightarrow\mu_{40}=\frac1{60}\). \(\mathring e_{40}=\int_0^{60}(1-\tfrac t{60})dt=30\). \(P(K_{40}=9)=\frac1{60}\) (tiap tahun penuh sama mungkin).`,'Dengan peluang 83,3% orang usia 40 hidup 10 tahun lagi; harapan sisa hidupnya 30 tahun (tepat setengah dari 60).')};
+const o1=O['pma-1'];
+const n4={...o1,t:"Tabel mortalitas (Pekan 5)",h:String.raw`<h2>Unsur tabel mortalitas</h2>
+<p>[[mort|Tabel mortalitas]] memuat \(\ell_x=\ell_0\,s(x)\) (banyak yang hidup di usia \(x\)) dan \(d_x=\ell_x-\ell_{x+1}\). Hubungannya dengan fungsi survival:</p>
+\[{}_tp_x=\frac{\ell_{x+t}}{\ell_x},\quad q_x=\frac{d_x}{\ell_x},\quad {}_{k|}q_x=\frac{d_{x+k}}{\ell_x},\quad e_x=\sum_{k=1}^{\infty}\frac{\ell_{x+k}}{\ell_x}\]
+<p>Lihat [[tpx|peluang hidup]], [[qx|peluang meninggal]], dan [[kdq|peluang meninggal tertunda]]. Jumlah orang yang masih hidup di usia \(x+t\) dari kelompok usia \(x\) adalah \(\ell_x\,{}_tp_x\).</p>
+`+exOf(o1.h)};
+const n5={id:"pma-n5",t:"Rumus rekursif dan usia fractional (Pekan 6)",h:String.raw`<h2>Rekursi</h2>
+<p>Satu langkah ke depan: \(\ell_{x+1}=\ell_x-d_x\), \({}_{n}p_x=p_x\,{}_{n-1}p_{x+1}\), dan untuk asuransi dan anuitas ([[rekursi|rekursi]]):</p>
+\[A_x=v\,q_x+v\,p_x\,A_{x+1},\qquad \ddot a_x=1+v\,p_x\,\ddot a_{x+1},\qquad {}_nE_x=v\,p_x\,{}_{n-1}E_{x+1}\]
+<h2>Usia fractional</h2>
+<p>Untuk \(0\le s\le1\), [[frac|tiga asumsi]]:</p>
+\[\text{UDD: }{}_sq_x=s\,q_x,\ \mu_{x+s}=\frac{q_x}{1-s\,q_x};\qquad \text{CFM: }{}_sp_x=p_x^{\,s},\ \mu_{x+s}=-\ln p_x;\qquad \text{Balducci: }{}_{1-s}q_{x+s}=(1-s)q_x\]`+EX(String.raw`Diketahui \(q_x=0{,}1\). Hitung \({}_{0{,}5}q_x\) dengan UDD, CFM, dan Balducci. Lalu hitung \(A_x\) bila \(A_{x+1}=0{,}3\), \(i=5\%\).`,String.raw`\(q_x=0{,}1\), \(s=0{,}5\), \(A_{x+1}=0{,}3\), \(i=5\%\).`,String.raw`\({}_{0{,}5}q_x\) (tiga asumsi) dan \(A_x\).`,String.raw`UDD: \(0{,}5(0{,}1)=0{,}05\). CFM: \(1-0{,}9^{0{,}5}=0{,}0513\). Balducci: \({}_{0{,}5}p_x=\frac{0{,}9}{1-0{,}5(0{,}1)}=0{,}9474\), jadi \({}_{0{,}5}q_x=0{,}0526\). Rekursi: \(A_x=\frac{0{,}1+0{,}9(0{,}3)}{1{,}05}=0{,}3524\).`,'Ketiga asumsi hanya berbeda tipis; UDD terkecil dan Balducci terbesar untuk setengah tahun pertama.')};
+const n7={id:"pma-n7",t:"Asuransi jiwa waktu kontinu (Pekan 9–10)",h:String.raw`<h2>Manfaat saat meninggal</h2>
+<p>Manfaat 1 dibayar saat kematian, \(Z=v^{T_x}\) ([[kontinu|santunan saat meninggal]]):</p>
+\[\bar A_x=\int_0^\infty v^t\,{}_tp_x\,\mu_{x+t}\,dt,\qquad \bar A^1_{x:\overline n|}=\int_0^nv^t\,{}_tp_x\,\mu_{x+t}\,dt,\qquad {}_{m|}\bar A_x=v^m{}_mp_x\bar A_{x+m}\]
+<p>[[pe|Pure endowment]] sama dengan kasus diskrit: \({}_nE_x=v^n\,{}_np_x\). Endowment: \(\bar A_{x:\overline n|}=\bar A^1_{x:\overline n|}+{}_nE_x\).</p>
+<h2>Momen dan variansi</h2>
+<p>[[mom2|Momen kedua]] memakai \(2\delta\): \({}^2\bar A_x=\bar A_x\) dengan \(\delta\to2\delta\). Maka \(\operatorname{Var}(Z)={}^2\bar A_x-\bar A_x^2\).</p>
+<h2>Laju kematian konstan</h2>
+<p>Bila \(\mu\) konstan: \(\bar A_x=\frac{\mu}{\mu+\delta}\), \({}^2\bar A_x=\frac{\mu}{\mu+2\delta}\), \(\bar A^1_{x:\overline n|}=\frac{\mu}{\mu+\delta}\big(1-e^{-(\mu+\delta)n}\big)\).</p>`+EX(String.raw`Laju kematian konstan \(\mu=0{,}04\) dan \(\delta=0{,}06\). Hitung \(\bar A_x\), \(\operatorname{Var}(Z)\), \(\bar A^1_{x:\overline{10}|}\), dan \(\bar A_{x:\overline{10}|}\).`,String.raw`\(\mu=0{,}04\), \(\delta=0{,}06\), \(n=10\).`,String.raw`\(\bar A_x\), \(\operatorname{Var}(Z)\), \(\bar A^1_{x:\overline{10}|}\), \(\bar A_{x:\overline{10}|}\).`,String.raw`\(\bar A_x=\frac{0{,}04}{0{,}10}=0{,}4\). \({}^2\bar A_x=\frac{0{,}04}{0{,}16}=0{,}25\), \(\operatorname{Var}(Z)=0{,}25-0{,}16=0{,}09\). \(\bar A^1_{x:\overline{10}|}=0{,}4(1-e^{-1})=0{,}2528\). \({}_{10}E_x=e^{-1}=0{,}3679\), endowment \(=0{,}6207\).`,'Santunan seumur hidup bernilai 0,4 per satuan manfaat saat ini; peluang hidup 10 tahun 36,8% menyumbang bagian endowment yang terbesar.')};
+const O3=O['pma-3'], O4=O['pma-4'];
+const n8={...O3,t:"Hubungan asuransi diskrit dan kontinu (Pekan 11)"};
+let h4=O4.h; const k4=h4.indexOf('<h2>Contoh soal');
+h4=h4.slice(0,k4)+String.raw`<h2>Anuitas hidup kontinu</h2>
+<p>[[akon|Anuitas kontinu]]: \(\bar a_x=\int_0^\infty v^t\,{}_tp_x\,dt=\frac{1-\bar A_x}{\delta}\) dan \(\bar a_{x:\overline n|}=\frac{1-\bar A_{x:\overline n|}}{\delta}\), dengan \(\operatorname{Var}(\bar Y)=\frac{{}^2\bar A_x-\bar A_x^2}{\delta^2}\). Laju kematian konstan \(\mu=0{,}04\), \(\delta=0{,}06\): \(\bar a_x=\frac1{\mu+\delta}=10=\frac{1-0{,}4}{0{,}06}\).</p>
+<h2>Anuitas hidup m kali setahun</h2>
+\[\ddot a^{(m)}_x=\sum_{k\ge0}\tfrac1m v^{k/m}\,{}_{k/m}p_x\approx\alpha(m)\ddot a_x-\beta(m),\quad \alpha(m)=\frac{i\,d}{i^{(m)}d^{(m)}},\ \ \beta(m)=\frac{i-i^{(m)}}{i^{(m)}d^{(m)}}\]
+<p>Aproksimasi Woolhouse: \(\ddot a^{(m)}_x\approx\ddot a_x-\frac{m-1}{2m}\) dan \(\bar a_x\approx\ddot a_x-\frac12\). Contoh \(\ddot a_x=15\), \(m=12\): \(\ddot a^{(12)}_x\approx15-\frac{11}{24}=14{,}5417\).</p>
+`+h4.slice(k4);
+const n9={...O4,t:"Anuitas hidup: diskrit, kontinu, m kali (Pekan 12–13)",h:h4};
+const n10={id:"pma-n10",t:"Premi manfaat: waktu diskrit (Pekan 14)",h:String.raw`<h2>Kerugian dan prinsip ekivalensi</h2>
+<p>Peserta usia \(x\) membayar premi \(P\) di awal tiap tahun selama hidup (atau selama masa bayar). [[lossL|Kerugian]] saat polis dibuat dan [[pek|prinsip ekivalensi]]:</p>
+\[L=Z-P\,\ddot a_{\overline{K_x+1}|},\qquad E[L]=0\ \Rightarrow\ P=\frac{E[Z]}{\ddot a_x}\]
+<h2>Premi bersih tahunan</h2>
+\[P_x=\frac{A_x}{\ddot a_x}=\frac1{\ddot a_x}-d,\quad P^1_{x:\overline n|}=\frac{A^1_{x:\overline n|}}{\ddot a_{x:\overline n|}},\quad P_{x:\overline n|}=\frac{A_{x:\overline n|}}{\ddot a_{x:\overline n|}},\quad {}_hP_x=\frac{A_x}{\ddot a_{x:\overline h|}}\]
+<p>Premi pure endowment \(=\frac{{}_nE_x}{\ddot a_{x:\overline n|}}\). Premi bersih dengan manfaat \(b\) adalah \(bP\).</p>
+<h2>Variansi kerugian</h2>
+<p>Karena \(\ddot a_{\overline{K+1}|}=\frac{1-Z}{d}\), \(L=Z(1+\frac Pd)-\frac Pd\) dan \(\operatorname{Var}(L)=(1+\frac Pd)^2\operatorname{Var}(Z)\). Untuk premi bersih, \(1+\frac Pd=\frac1{d\,\ddot a}\), jadi \(\operatorname{Var}(L)=\dfrac{{}^2A-A^2}{(d\,\ddot a)^2}\). Contoh: \(A_x=0{,}2857\), \(\ddot a_x=15\), \({}^2A_x=0{,}1\), \(i=5\%\): \(\operatorname{Var}(L)=\frac{0{,}1-0{,}0816}{(0{,}7143)^2}\approx0{,}036\).</p>`+EX(String.raw`Asuransi berjangka 2 tahun, manfaat 1.000, \(q_x=0{,}01\), \(q_{x+1}=0{,}02\), \(i=5\%\), premi tahunan dibayar di awal tahun selama 2 tahun. Hitung premi bersih.`,String.raw`\(A^1_{x:\overline{2}|}=0{,}027483\) (bab asuransi diskrit), \(p_x=0{,}99\).`,String.raw`\(1000\,P^1_{x:\overline{2}|}\).`,String.raw`\(\ddot a_{x:\overline{2}|}=1+\frac{0{,}99}{1{,}05}=1{,}9429\). \(P^1_{x:\overline{2}|}=\frac{0{,}027483}{1{,}9429}=0{,}014146\). Untuk manfaat 1.000: \(14{,}15\).`,'Premi bersih Rp14,15 per tahun per Rp1.000 manfaat; premi di awal tahun kedua dibayar hanya bila peserta hidup.')};
+const n11={id:"pma-n11",t:"Premi manfaat: waktu kontinu (Pekan 15)",h:String.raw`<h2>Fully continuous</h2>
+<p>[[pkon|Premi kontinu]] dengan laju \(\bar P\) per tahun dan manfaat saat meninggal:</p>
+\[\bar L=v^{T_x}-\bar P\,\bar a_{\overline{T_x}|},\qquad \bar P(\bar A_x)=\frac{\bar A_x}{\bar a_x}=\frac1{\bar a_x}-\delta,\qquad \bar P(\bar A_{x:\overline n|})=\frac{\bar A_{x:\overline n|}}{\bar a_{x:\overline n|}}\]
+\[\operatorname{Var}(\bar L)=\Big(1+\frac{\bar P}{\delta}\Big)^2\operatorname{Var}(Z)=\frac{{}^2\bar A_x-\bar A_x^2}{(\delta\,\bar a_x)^2}\]
+<h2>Semicontinuous dan m kali setahun</h2>
+<p>Manfaat saat meninggal, premi tahunan di awal tahun: \(P(\bar A_x)=\frac{\bar A_x}{\ddot a_x}\approx\frac i\delta P_x\) (UDD). Premi \(m\) kali setahun: \(P^{(m)}(A_x)=\frac{A_x}{\ddot a^{(m)}_x}\), dengan \(P^{(m)}/m\) dibayar tiap \(1/m\) tahun.</p>`+EX(String.raw`Laju kematian konstan \(\mu=0{,}04\), \(\delta=0{,}06\). Hitung laju premi kontinu \(\bar P(\bar A_x)\) dan \(\operatorname{Var}(\bar L)\).`,String.raw`\(\bar A_x=0{,}4\), \(\bar a_x=10\), \({}^2\bar A_x=0{,}25\).`,String.raw`\(\bar P(\bar A_x)\) dan \(\operatorname{Var}(\bar L)\).`,String.raw`\(\bar P=\frac{0{,}4}{10}=0{,}04\). \(\operatorname{Var}(\bar L)=\frac{0{,}25-0{,}16}{(0{,}06\times10)^2}=\frac{0{,}09}{0{,}36}=0{,}25\).`,'Pada laju kematian konstan, laju premi sama dengan \(\mu\) (0,04 per tahun per satuan manfaat), terlepas dari \(\delta\).')};
+const a5={...O['pma-5'],t:"Lampiran: cheatsheet notasi asuransi jiwa"}, a6={...O['pma-6'],t:"Lampiran: joint life, manfaat berubah, cadangan"};
+C.pma.ch=[n1,n2,n3,n4,n5,{...O['pma-2'],t:"Asuransi jiwa waktu diskrit (Pekan 7–8)"},n7,n8,n9,n10,n11,a5,a6];
+C.pma.ch.forEach(x=>flat[x.id]={...x,k:'pma'});
+if(typeof show==='function') show(location.hash.slice(1));
 })();
 </script>
 
